@@ -32,7 +32,7 @@
 2. **명시적 오류 처리**: 에러를 숨기거나 무시하지 않는다. 모든 예외 경로를 명시적으로 처리한다.
 3. **불변성 선호**: 상태 변이(mutation)를 최소화하고 새 값을 반환하는 방식을 선호한다.
 4. **순수 함수 우선**: 부수 효과(side effect)는 경계(레이어 진입점, 이벤트 핸들러)로 격리한다.
-5. **타입 안전성**: TypeScript strict 모드를 활성화하고 `any` 타입 사용을 금지한다.
+5. **타입 안전성**: 프론트엔드는 TypeScript strict 모드를 활성화하고 `any` 타입 사용을 금지한다. 백엔드는 JavaScript(Node.js)를 사용한다.
 
 ### 1.3 변경에 강한 구조를 위한 원칙
 
@@ -137,16 +137,16 @@
 
 ### 3.3 DB 컬럼명 ↔ 코드 변수명 변환 기준
 
-**DB는 snake_case, 코드(TypeScript)는 camelCase를 사용한다. 변환은 Repository 레이어 경계에서만 수행한다.**
+**DB는 snake_case, 코드는 camelCase를 사용한다. 변환은 Repository 레이어 경계에서만 수행한다.**
 
 - DB 컬럼: `user_id`, `is_completed`, `due_date`, `created_at`
-- TypeScript 변수: `userId`, `isCompleted`, `dueDate`, `createdAt`
+- 코드 변수: `userId`, `isCompleted`, `dueDate`, `createdAt`
 - Repository에서 SELECT 결과를 반환할 때 camelCase로 변환하여 반환한다. Service와 Controller는 항상 camelCase 객체를 다룬다.
 - INSERT/UPDATE 시 Repository 내부에서 camelCase → snake_case 매핑을 수행한다.
 
-```typescript
-// Repository 내부 변환 예시
-function mapRowToTodo(row: TodoRow): Todo {
+```javascript
+// Repository 내부 변환 예시 (백엔드 JavaScript)
+function mapRowToTodo(row) {
   return {
     id: row.id,
     userId: row.user_id,
@@ -187,7 +187,7 @@ function mapRowToTodo(row: TodoRow): Todo {
 - 버전 관리: 현재는 `/api` prefix만 사용. 하위 호환 불가 변경 발생 시 `/api/v2`로 확장한다.
 - 필터 파라미터: 쿼리 스트링 사용 (`GET /api/todos?categoryId=uuid&isCompleted=false&dueDate=2026-05-13`)
 
-### 3.5 TypeScript 타입 / 인터페이스 네이밍 규칙
+### 3.5 TypeScript 타입 / 인터페이스 네이밍 규칙 (프론트엔드 전용)
 
 - **도메인 엔티티 타입**: PascalCase, 명사 (`Todo`, `Category`, `User`)
 - **요청 DTO**: PascalCase + `Request` 접미사 (`CreateTodoRequest`, `LoginRequest`)
@@ -203,8 +203,9 @@ function mapRowToTodo(row: TodoRow): Todo {
 - **파일 내 상수**: UPPER_SNAKE_CASE (`MAX_RETRIES`, `DEFAULT_PAGE_SIZE`)
 - **객체형 상수 (enum-like)**: PascalCase 객체 + UPPER_SNAKE_CASE 키
 
-```typescript
-export const HTTP_STATUS = {
+```javascript
+// 백엔드 (JavaScript)
+const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
   BAD_REQUEST: 400,
@@ -212,13 +213,13 @@ export const HTTP_STATUS = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
-} as const;
+};
 
-export const ERROR_CODES = {
+const ERROR_CODES = {
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
   FORBIDDEN_RESOURCE: 'FORBIDDEN_RESOURCE',
-} as const;
+};
 ```
 
 ---
@@ -256,7 +257,7 @@ export const ERROR_CODES = {
 - **테스트 설명은 유스케이스의 AC를 그대로 반영한다.** `describe`는 기능/유스케이스, `it`은 AC 문장으로 작성한다.
 - 테스트 케이스는 Happy Path(정상), Edge Case(경계), Failure Path(실패) 세 가지를 모두 포함한다.
 
-```typescript
+```javascript
 describe('UC-04: 할일 등록', () => {
   it('유효한 요청 시 201과 생성된 할일을 반환한다', async () => { ... });
   it('title이 빈 문자열이면 400을 반환한다', async () => { ... });
@@ -268,10 +269,9 @@ describe('UC-04: 할일 등록', () => {
 ### 4.5 코드 품질 도구 설정 원칙
 
 **ESLint**
-- TypeScript strict 규칙 적용 (`@typescript-eslint/recommended-type-checked`)
-- `no-console`: warn (개발 중 허용, 프로덕션 빌드에서 오류)
-- `import/no-cycle`: error (순환 의존 검출)
-- `@typescript-eslint/no-explicit-any`: error
+- 프론트엔드: TypeScript strict 규칙 적용 (`@typescript-eslint/recommended-type-checked`), `@typescript-eslint/no-explicit-any`: error
+- 백엔드: `eslint:recommended` 기반 JavaScript 규칙 적용
+- 공통: `no-console`: warn (개발 중 허용, 프로덕션 빌드에서 오류), `import/no-cycle`: error (순환 의존 검출)
 
 **Prettier**
 - 모든 파일에 동일하게 적용 (탭 크기: 2, 세미콜론: true, 작은따옴표: true, 줄 길이: 100)
@@ -494,79 +494,73 @@ frontend/
 ```
 backend/
 ├── src/
-│   ├── index.ts                         # 서버 진입점, 환경 변수 검증, app.listen
-│   ├── app.ts                           # Express 앱 설정, 미들웨어 등록, 라우터 마운트
+│   ├── index.js                         # 서버 진입점, 환경 변수 검증, app.listen
+│   ├── app.js                           # Express 앱 설정, 미들웨어 등록, 라우터 마운트
 │   │
 │   ├── routes/                          # Express 라우터 — URL 경로와 Controller 연결만 담당
-│   │   ├── auth.routes.ts               # /api/auth/* 경로 정의
-│   │   ├── todo.routes.ts               # /api/todos/* 경로 정의
-│   │   ├── category.routes.ts           # /api/categories/* 경로 정의
-│   │   └── user.routes.ts               # /api/users/* 경로 정의
+│   │   ├── auth.routes.js               # /api/auth/* 경로 정의
+│   │   ├── todo.routes.js               # /api/todos/* 경로 정의
+│   │   ├── category.routes.js           # /api/categories/* 경로 정의
+│   │   └── user.routes.js               # /api/users/* 경로 정의
 │   │
 │   ├── controllers/                     # HTTP 요청/응답 처리 — 입력 추출, Service 호출, 응답 반환
-│   │   ├── auth.controller.ts           # signup, login, logout, deleteAccount
-│   │   ├── todo.controller.ts           # createTodo, getTodos, getTodoById, updateTodo, deleteTodo
-│   │   ├── category.controller.ts       # createCategory, getCategories, updateCategory, deleteCategory
-│   │   └── user.controller.ts           # updateProfile
+│   │   ├── auth.controller.js           # signup, login, logout, deleteAccount
+│   │   ├── todo.controller.js           # createTodo, getTodos, getTodoById, updateTodo, deleteTodo
+│   │   ├── category.controller.js       # createCategory, getCategories, updateCategory, deleteCategory
+│   │   └── user.controller.js           # updateProfile
 │   │
 │   ├── services/                        # 비즈니스 로직 — 도메인 규칙, 권한 검사, 트랜잭션 조율
-│   │   ├── auth.service.ts              # 회원가입(bcrypt), 로그인(JWT 발급), 토큰 갱신, 탈퇴
-│   │   ├── todo.service.ts              # 할일 CRUD 규칙, 소유권 검사, 필터 처리
-│   │   ├── category.service.ts          # 기본 카테고리 수정/삭제 방어, 소유권 검사
-│   │   └── user.service.ts              # 개인정보 수정, 비밀번호 변경
+│   │   ├── auth.service.js              # 회원가입(bcrypt), 로그인(JWT 발급), 탈퇴
+│   │   ├── todo.service.js              # 할일 CRUD 규칙, 소유권 검사, 필터 처리
+│   │   ├── category.service.js          # 기본 카테고리 수정/삭제 방어, 소유권 검사
+│   │   └── user.service.js              # 개인정보 수정, 비밀번호 변경
 │   │
 │   ├── repositories/                    # DB 접근 — pg Raw SQL 실행, 결과 매핑 (snake_case → camelCase)
-│   │   ├── user.repository.ts           # users 테이블 CRUD 쿼리
-│   │   ├── todo.repository.ts           # todos 테이블 CRUD + 필터 쿼리
-│   │   └── category.repository.ts       # categories 테이블 CRUD 쿼리
+│   │   ├── user.repository.js           # users 테이블 CRUD 쿼리
+│   │   ├── todo.repository.js           # todos 테이블 CRUD + 필터 쿼리
+│   │   └── category.repository.js       # categories 테이블 CRUD 쿼리
 │   │
 │   ├── middlewares/                     # Express 미들웨어
-│   │   ├── authenticate.middleware.ts   # JWT Access Token 검증, req.user 주입
-│   │   ├── validate.middleware.ts       # 요청 바디/쿼리 유효성 검사 (zod 스키마 기반)
-│   │   ├── errorHandler.middleware.ts   # 전역 에러 핸들러 — 도메인 에러 → HTTP 응답 변환
-│   │   └── requestLogger.middleware.ts  # 요청/응답 구조화 로깅
+│   │   ├── authenticate.middleware.js   # JWT Access Token 검증, req.user 주입
+│   │   ├── validate.middleware.js       # 요청 바디/쿼리 유효성 검사
+│   │   ├── errorHandler.middleware.js   # 전역 에러 핸들러 — 도메인 에러 → HTTP 응답 변환
+│   │   └── requestLogger.middleware.js  # 요청/응답 구조화 로깅
 │   │
 │   ├── db/                              # DB 연결 설정 및 마이그레이션
-│   │   ├── pool.ts                      # pg Pool 인스턴스 생성 및 내보내기
+│   │   ├── pool.js                      # pg Pool 인스턴스 생성 및 내보내기
 │   │   └── migrations/                  # SQL 마이그레이션 파일 (순번 관리)
 │   │       ├── 001_create_users.sql
 │   │       ├── 002_create_categories.sql
 │   │       └── 003_create_todos.sql
 │   │
 │   ├── config/                          # 환경 변수 파싱 및 설정 객체 내보내기
-│   │   └── env.config.ts                # 환경 변수 검증(zod), 설정 객체 export
+│   │   └── env.config.js                # 환경 변수 검증, 설정 객체 export
 │   │
 │   ├── errors/                          # 도메인 에러 클래스 정의
-│   │   └── AppError.ts                  # AppError, NotFoundError, ForbiddenError, ConflictError, UnauthorizedError
-│   │
-│   ├── types/                           # TypeScript 타입 / 인터페이스
-│   │   ├── domain.types.ts              # Todo, Category, User 도메인 엔티티 타입
-│   │   ├── request.types.ts             # Express Request 확장 (req.user 타입 추가)
-│   │   └── api.types.ts                 # ApiResponse<T>, 표준 에러 응답 타입
+│   │   └── AppError.js                  # AppError, NotFoundError, ForbiddenError, ConflictError, UnauthorizedError
 │   │
 │   └── utils/                           # 순수 유틸리티 함수
-│       ├── jwt.utils.ts                 # JWT 생성/검증 래퍼 함수
-│       ├── password.utils.ts            # bcrypt hash/compare 래퍼 함수
-│       └── response.utils.ts            # 표준 응답 객체 생성 헬퍼 (success, error)
+│       ├── jwt.utils.js                 # JWT 생성/검증 래퍼 함수
+│       ├── password.utils.js            # bcrypt hash/compare 래퍼 함수
+│       └── response.utils.js            # 표준 응답 객체 생성 헬퍼 (success, error)
 │
 ├── tests/
 │   ├── unit/                            # Service 단위 테스트 (Repository mock)
-│   │   ├── auth.service.test.ts
-│   │   ├── todo.service.test.ts
-│   │   └── category.service.test.ts
+│   │   ├── auth.service.test.js
+│   │   ├── todo.service.test.js
+│   │   └── category.service.test.js
 │   ├── integration/                     # API 통합 테스트 (Supertest + 테스트 DB)
-│   │   ├── auth.test.ts
-│   │   ├── todo.test.ts
-│   │   └── category.test.ts
+│   │   ├── auth.test.js
+│   │   ├── todo.test.js
+│   │   └── category.test.js
 │   └── helpers/
-│       ├── testDb.ts                    # 테스트 DB 초기화, 트랜잭션 롤백 헬퍼
-│       └── testApp.ts                   # 테스트용 Express 앱 인스턴스
+│       ├── testDb.js                    # 테스트 DB 초기화, 트랜잭션 롤백 헬퍼
+│       └── testApp.js                   # 테스트용 Express 앱 인스턴스
 │
 ├── .env.example                         # 환경 변수 키 템플릿 (값 없음)
 ├── .env                                 # 로컬 환경 변수 (git 제외)
-├── tsconfig.json
-├── eslint.config.ts
-├── jest.config.ts
+├── eslint.config.js
+├── jest.config.js
 └── package.json
 ```
 

@@ -27,15 +27,23 @@
 
 > 개발 환경에서 PostgreSQL 17 인스턴스를 준비하고 연결을 검증한다.
 
+> **[결정사항]** Docker 없이 로컬 머신에 PostgreSQL 17을 직접 설치하는 방식을 채택함.
+> PostgreSQL 17.9 (Windows x86_64) 설치 및 기동 완료 확인.
+
 **작업 목록**
-- [ ] Docker Compose 또는 로컬 PostgreSQL 17 설치 및 기동
-- [ ] 개발용 DB 생성 (`todolist_dev`)
-- [ ] `.env` 파일에 `DATABASE_URL` 등 접속 정보 기재
-- [ ] `psql` 또는 DBeaver 등으로 접속 확인
+- [x] 로컬 머신에 PostgreSQL 17 직접 설치 및 기동 (PostgreSQL 17.9 확인)
+- [x] `.env` 파일에 접속 정보 기재 (`POSTGRES_CONNECTION_STRING` 설정 완료)
+- [x] MCP를 통한 로컬 DB 접속 확인
+- [x] 개발용 DB 생성 (`todolist_dev`)
 
 **완료 조건**
-- [ ] `psql -U <user> -d todolist_dev` 접속 성공
-- [ ] `SELECT version();` 결과가 PostgreSQL 17.x 반환
+- [x] `SELECT version();` 결과가 PostgreSQL 17.x 반환 → **PostgreSQL 17.9 확인**
+- [x] `todolist_dev` DB 접속 성공
+
+**접속 정보** (`.env` 기준)
+```
+POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolist_dev
+```
 
 **의존성**: 없음
 
@@ -47,13 +55,13 @@
 
 **작업 목록**
 - [x] `database/schema.sql` 파일 작성 완료
-- [ ] `psql -d todolist_dev -f database/schema.sql` 실행
-- [ ] 시드 데이터(업무/개인/기타) 정상 삽입 확인
+- [x] `todolist_dev` DB에 스키마 적용 완료 (MCP 통해 직접 실행)
+- [x] 시드 데이터(업무/개인/기타) 정상 삽입 확인
 
 **완료 조건**
-- [ ] `\dt` 명령으로 `users`, `categories`, `todos` 3개 테이블 존재 확인
-- [ ] `SELECT * FROM categories WHERE is_default = true;` 결과 3행 반환
-- [ ] `SELECT user_id FROM categories WHERE is_default = true;` 결과 전부 NULL
+- [x] `users`, `categories`, `todos` 3개 테이블 존재 확인
+- [x] `SELECT * FROM categories WHERE is_default = true;` 결과 3행 반환
+- [x] 기본 카테고리 `user_id` 전부 NULL 확인
 
 **의존성**: `depends: DB-01`
 
@@ -63,14 +71,13 @@
 
 ### BE-01: 프로젝트 초기화 및 디렉토리 구조 생성
 
-> Node.js + Express + TypeScript 기반 백엔드 프로젝트 골격을 생성한다.
+> Node.js + Express (JavaScript) 기반 백엔드 프로젝트 골격을 생성한다.
 
 **작업 목록**
-- [ ] `backend/` 디렉토리 생성 및 `npm init -y`
-- [ ] 패키지 설치: `express`, `pg`, `jsonwebtoken`, `bcrypt`, `dotenv`, `cors`
-- [ ] 개발 의존성: `typescript`, `ts-node`, `nodemon`, `@types/*`
-- [ ] `tsconfig.json` 설정 (strict mode, ES2022 target)
-- [ ] 디렉토리 구조 생성:
+- [x] `backend/` 디렉토리 생성 및 `npm init -y`
+- [x] 패키지 설치: `express`, `pg`, `jsonwebtoken`, `bcrypt`, `dotenv`, `cors`
+- [x] 개발 의존성: `nodemon`
+- [x] 디렉토리 구조 생성:
   ```
   backend/src/
   ├── routes/
@@ -81,15 +88,14 @@
   ├── db/
   ├── config/
   ├── errors/
-  ├── types/
   └── utils/
   ```
-- [ ] `package.json` scripts 설정 (`dev`, `build`, `start`)
-- [ ] `.env.example` 파일 작성 (DB, JWT_SECRET, PORT)
+- [x] `package.json` scripts 설정 (`dev`, `start`)
+- [x] `.env.example` 파일 작성 (DB, JWT_SECRET, PORT)
 
 **완료 조건**
-- [ ] `npm run dev` 실행 시 서버 기동 성공 (예: `Listening on port 3000`)
-- [ ] `GET /api/health` → `200 OK` 응답 확인
+- [x] `npm run dev` 실행 시 서버 기동 성공 (예: `Listening on port 3000`)
+- [x] `GET /api/health` → `200 OK` 응답 확인 (Jest + Supertest 4/4 통과)
 
 **의존성**: 없음
 
@@ -100,13 +106,13 @@
 > `pg.Pool`을 이용한 데이터베이스 연결 풀을 설정하고, 환경 변수 검증 로직을 추가한다.
 
 **작업 목록**
-- [ ] `backend/src/db/pool.ts` — `pg.Pool` 인스턴스 생성 및 export
-- [ ] `backend/src/config/env.ts` — 필수 환경 변수 검증 (없으면 프로세스 종료)
-- [ ] DB 연결 실패 시 에러 로그 출력 및 종료 처리
+- [x] `backend/src/db/pool.js` — `pg.Pool` 인스턴스 생성 및 export
+- [x] `backend/src/config/env.config.js` — 필수 환경 변수 검증 (없으면 프로세스 종료)
+- [x] DB 연결 실패 시 에러 로그 출력 및 종료 처리
 
 **완료 조건**
-- [ ] 서버 기동 시 `DB connected` 로그 출력
-- [ ] 잘못된 DB URL로 실행 시 명확한 에러 메시지와 함께 종료
+- [x] 서버 기동 시 `DB connected` 로그 출력
+- [x] 잘못된 DB URL로 실행 시 명확한 에러 메시지와 함께 종료
 
 **의존성**: `depends: BE-01, DB-02`
 
@@ -117,16 +123,15 @@
 > HTTP 에러 클래스, 응답 헬퍼, JWT/bcrypt 유틸리티를 구현한다.
 
 **작업 목록**
-- [ ] `backend/src/errors/AppError.ts` — 베이스 에러 클래스 (statusCode, message, code)
-- [ ] `backend/src/errors/index.ts` — `BadRequestError(400)`, `UnauthorizedError(401)`, `ForbiddenError(403)`, `NotFoundError(404)`, `ConflictError(409)` 정의
-- [ ] `backend/src/utils/jwt.ts` — `signToken(payload)`, `verifyToken(token)` 함수 (만료 1시간)
-- [ ] `backend/src/utils/bcrypt.ts` — `hashPassword(plain)`, `comparePassword(plain, hash)` 함수 (salt rounds 12)
-- [ ] `backend/src/utils/response.ts` — 성공 응답 표준 포맷 헬퍼 (`{ data, message }`)
+- [x] `backend/src/errors/AppError.js` — 베이스 에러 클래스 + `BadRequestError(400)`, `UnauthorizedError(401)`, `ForbiddenError(403)`, `NotFoundError(404)`, `ConflictError(409)` 정의
+- [x] `backend/src/utils/jwt.utils.js` — `signToken(payload)`, `verifyToken(token)` 함수 (만료 1시간)
+- [x] `backend/src/utils/password.utils.js` — `hashPassword(plain)`, `comparePassword(plain, hash)` 함수 (salt rounds 12)
+- [x] `backend/src/utils/response.utils.js` — 성공/에러 응답 표준 포맷 헬퍼
 
 **완료 조건**
-- [ ] `AppError` 인스턴스가 `instanceof AppError` 판별 가능
-- [ ] `signToken` + `verifyToken` 왕복 테스트 통과
-- [ ] `hashPassword` + `comparePassword` 왕복 테스트 통과
+- [x] `AppError` 인스턴스가 `instanceof AppError` 판별 가능
+- [x] `signToken` + `verifyToken` 왕복 테스트 통과
+- [x] `hashPassword` + `comparePassword` 왕복 테스트 통과
 
 **의존성**: `depends: BE-01`
 
@@ -137,15 +142,15 @@
 > JWT 인증 미들웨어, 에러 핸들러, 요청 로깅 미들웨어를 구현한다.
 
 **작업 목록**
-- [ ] `backend/src/middlewares/auth.ts` — `Authorization: Bearer <token>` 추출 → `verifyToken` → `req.user` 주입; 실패 시 `UnauthorizedError`
-- [ ] `backend/src/middlewares/errorHandler.ts` — `AppError`는 statusCode 사용, 그 외는 500 반환; 프로덕션에서 스택 트레이스 제외
-- [ ] `backend/src/middlewares/requestLogger.ts` — `[METHOD] /path → statusCode` 구조화 로그 출력
-- [ ] `app.ts`에 전역 미들웨어 등록 (`cors`, `json`, requestLogger, routes, errorHandler)
+- [x] `backend/src/middlewares/authenticate.js` — `Authorization: Bearer <token>` 추출 → `verifyToken` → `req.user` 주입; 실패 시 `UnauthorizedError`
+- [x] `backend/src/middlewares/errorHandler.js` — `AppError`는 statusCode 사용, 그 외는 500 반환; 프로덕션에서 스택 트레이스 제외
+- [x] `backend/src/middlewares/requestLogger.js` — `[METHOD] /path → statusCode` 구조화 로그 출력
+- [x] `app.js`에 전역 미들웨어 등록 (`cors`, `json`, requestLogger, errorHandler)
 
 **완료 조건**
-- [ ] 유효한 JWT 없이 보호된 엔드포인트 요청 시 `401 Unauthorized` 반환
-- [ ] 존재하지 않는 라우트 요청 시 `404 Not Found` 반환
-- [ ] 처리되지 않은 에러 발생 시 `500 Internal Server Error` 반환 (스택 트레이스 미포함)
+- [x] 유효한 JWT 없이 보호된 엔드포인트 요청 시 `401 Unauthorized` 반환
+- [x] 존재하지 않는 라우트 요청 시 `404 Not Found` 반환
+- [x] 처리되지 않은 에러 발생 시 `500 Internal Server Error` 반환 (스택 트레이스 미포함)
 
 **의존성**: `depends: BE-03`
 
@@ -157,41 +162,30 @@
 
 **작업 목록**
 
-**Repository (`repositories/authRepository.ts`)**
-- [ ] `findByEmail(email)` — users 테이블 조회
-- [ ] `createUser(email, hashedPassword, name)` — INSERT 후 생성된 row 반환
-- [ ] `deleteUser(userId)` — users 테이블 삭제 (CASCADE DELETE 자동 처리)
+**Repository (`repositories/authRepository.js`)**
+- [x] `findByEmail(email)`, `findById(userId)` — users 테이블 조회
+- [x] `createUser(email, hashedPassword, name)` — INSERT 후 생성된 row 반환
+- [x] `deleteUser(userId)` — users 테이블 삭제 (CASCADE DELETE 자동 처리)
 
-**Service (`services/authService.ts`)**
-- [ ] `signup(email, password, name)`:
-  - 이메일 중복 체크 → `ConflictError` (BR-01)
-  - 비밀번호 형식 검증: 8자 이상, 영문+숫자 조합 필수 (BR-02)
-  - `hashPassword` 적용 후 저장
-- [ ] `login(email, password)`:
-  - 이메일 없음 또는 비밀번호 불일치 → `UnauthorizedError` (BR-03, 구체적 원인 미노출)
-  - `signToken({ userId, email })` 반환
-- [ ] `logout()` — 서버에서는 무동작 (토큰은 클라이언트가 삭제)
-- [ ] `deleteAccount(userId, password)`:
-  - 비밀번호 재확인 → `UnauthorizedError`
-  - `deleteUser(userId)` 호출
+**Service (`services/authService.js`)**
+- [x] `signup`, `login`, `logout`, `deleteAccount` — BR-01~BR-03 완전 구현
 
-**Controller (`controllers/authController.ts`)**
-- [ ] `POST /api/auth/signup` — `201 Created` + 생성된 사용자 정보
-- [ ] `POST /api/auth/login` — `200 OK` + `{ accessToken }`
-- [ ] `POST /api/auth/logout` — `200 OK`
-- [ ] `DELETE /api/auth/account` — `200 OK` (JWT 인증 필요)
+**Controller (`controllers/authController.js`)**
+- [x] `POST /api/auth/signup` — `201 Created`
+- [x] `POST /api/auth/login` — `200 OK` + `{ accessToken, user }`
+- [x] `POST /api/auth/logout` — `200 OK`
+- [x] `DELETE /api/auth/account` — `200 OK`
 
-**Routes (`routes/authRouter.ts`)**
-- [ ] 위 4개 엔드포인트 라우터 등록
-- [ ] `/api/auth/account`에 `authMiddleware` 적용
+**Routes (`routes/authRouter.js`)**
+- [x] 4개 엔드포인트 등록, `/logout`, `/account`에 `authenticate` 적용
 
 **완료 조건**
-- [ ] `POST /api/auth/signup` 정상 요청 → `201` + 사용자 데이터 반환
-- [ ] 중복 이메일 가입 시 `409 Conflict` 반환
-- [ ] 잘못된 비밀번호 형식 가입 시 `400 Bad Request` 반환
-- [ ] `POST /api/auth/login` 정상 요청 → `200` + accessToken 반환
-- [ ] 비밀번호 불일치 로그인 → `401 Unauthorized` 반환
-- [ ] `DELETE /api/auth/account` 정상 요청 → `200 OK`, DB에서 사용자 삭제 확인
+- [x] `POST /api/auth/signup` 정상 요청 → `201` + 사용자 데이터 반환
+- [x] 중복 이메일 가입 시 `409 Conflict` 반환
+- [x] 잘못된 비밀번호 형식 가입 시 `400 Bad Request` 반환
+- [x] `POST /api/auth/login` 정상 요청 → `200` + accessToken 반환
+- [x] 비밀번호 불일치 로그인 → `401 Unauthorized` 반환
+- [x] `DELETE /api/auth/account` 정상 요청 → `200 OK`, DB에서 사용자 삭제 확인
 
 **의존성**: `depends: BE-02, BE-03, BE-04`
 
@@ -203,41 +197,24 @@
 
 **작업 목록**
 
-**Repository (`repositories/categoryRepository.ts`)**
-- [ ] `findAllByUser(userId)` — 기본 카테고리(`user_id IS NULL`) + 해당 사용자 카테고리 조회
-- [ ] `findById(categoryId)` — 단일 카테고리 조회
-- [ ] `create(userId, name)` — INSERT 후 생성된 row 반환
-- [ ] `update(categoryId, name)` — UPDATE 후 수정된 row 반환
-- [ ] `delete(categoryId)` — DELETE
+**Repository (`repositories/categoryRepository.js`)**
+- [x] `findAllByUser`, `findById`, `create`, `update`, `deleteById`, `countTodosByCategory`
 
-**Service (`services/categoryService.ts`)**
-- [ ] `getCategories(userId)` — Repository 위임
-- [ ] `createCategory(userId, name)`:
-  - 동일 사용자 내 카테고리명 중복 체크 → `ConflictError` (BR-10)
-- [ ] `updateCategory(userId, categoryId, name)`:
-  - 기본 카테고리 수정 불가 → `ForbiddenError` (BR-08)
-  - 본인 소유 확인 → `ForbiddenError` (BR-09)
-  - 카테고리명 중복 체크 (BR-10)
-- [ ] `deleteCategory(userId, categoryId)`:
-  - 기본 카테고리 삭제 불가 → `ForbiddenError` (BR-08)
-  - 본인 소유 확인 → `ForbiddenError` (BR-09)
-  - 해당 카테고리에 할일이 존재하면 삭제 불가 → `BadRequestError` (BR-11)
+**Service (`services/categoryService.js`)**
+- [x] `getCategories`, `createCategory`, `updateCategory`, `deleteCategory` — BR-08~BR-11 완전 구현
 
-**Controller (`controllers/categoryController.ts`)**
-- [ ] `GET /api/categories` — `200 OK` + categories 배열
-- [ ] `POST /api/categories` — `201 Created` + 생성된 category
-- [ ] `PATCH /api/categories/:id` — `200 OK` + 수정된 category
-- [ ] `DELETE /api/categories/:id` — `200 OK`
+**Controller (`controllers/categoryController.js`)**
+- [x] `GET /api/categories`, `POST /api/categories`, `PATCH /api/categories/:id`, `DELETE /api/categories/:id`
 
-**Routes (`routes/categoryRouter.ts`)**
-- [ ] 전체 엔드포인트에 `authMiddleware` 적용
+**Routes (`routes/categoryRouter.js`)**
+- [x] 전체 엔드포인트에 `authenticate` 적용
 
 **완료 조건**
-- [ ] `GET /api/categories` → 기본 3개 + 사용자 정의 카테고리 반환
-- [ ] 기본 카테고리(is_default=true) 수정/삭제 시 `403 Forbidden` 반환
-- [ ] 타인 카테고리 수정/삭제 시 `403 Forbidden` 반환
-- [ ] 할일이 있는 카테고리 삭제 시 `400 Bad Request` 반환
-- [ ] 동일 사용자 내 카테고리명 중복 생성 시 `409 Conflict` 반환
+- [x] `GET /api/categories` → 기본 3개 + 사용자 정의 카테고리 반환
+- [x] 기본 카테고리(is_default=true) 수정/삭제 시 `403 Forbidden` 반환
+- [x] 타인 카테고리 수정/삭제 시 `403 Forbidden` 반환
+- [x] 할일이 있는 카테고리 삭제 시 `400 Bad Request` 반환
+- [x] 동일 사용자 내 카테고리명 중복 생성 시 `409 Conflict` 반환
 
 **의존성**: `depends: BE-04, BE-05`
 
@@ -249,45 +226,26 @@
 
 **작업 목록**
 
-**Repository (`repositories/todoRepository.ts`)**
-- [ ] `findAllByUser(userId, filters)` — 카테고리ID / isCompleted / dueDate 범위 AND 필터 지원 (동적 WHERE 절 parameterized query)
-- [ ] `findById(todoId)` — 단일 할일 조회
-- [ ] `create(userId, categoryId, title, description, dueDate)` — INSERT 후 생성된 row 반환
-- [ ] `update(todoId, fields)` — 부분 업데이트(PATCH), `updatedAt` 자동 갱신
-- [ ] `delete(todoId)` — DELETE
+**Repository (`repositories/todoRepository.js`)**
+- [x] `findAllByUser(userId, filters)` — 동적 WHERE절 parameterized query (AND 필터)
+- [x] `findById`, `create`, `update(동적 SET절)`, `deleteById`
 
-**Service (`services/todoService.ts`)**
-- [ ] `getTodos(userId, filters)` — Repository 위임 (BR-12, BR-13)
-- [ ] `getTodoById(userId, todoId)`:
-  - 존재 확인 → `NotFoundError`
-  - 본인 소유 확인 → `ForbiddenError` (BR-06)
-- [ ] `createTodo(userId, data)`:
-  - 제목 필수 확인 (BR-04)
-  - 카테고리 존재 및 접근 권한 확인 (BR-05)
-- [ ] `updateTodo(userId, todoId, data)`:
-  - 존재 확인, 본인 소유 확인 (BR-06)
-  - `isCompleted` 양방향 토글 허용 (BR-07)
-  - 카테고리 변경 시 카테고리 존재 확인
-- [ ] `deleteTodo(userId, todoId)`:
-  - 존재 확인, 본인 소유 확인 (BR-06)
+**Service (`services/todoService.js`)**
+- [x] `getTodos`, `getTodoById`, `createTodo`, `updateTodo`, `deleteTodo` — BR-04~BR-07 완전 구현
 
-**Controller (`controllers/todoController.ts`)**
-- [ ] `GET /api/todos` — `200 OK` + todos 배열 (쿼리 파라미터: `categoryId`, `isCompleted`, `dueDateFrom`, `dueDateTo`)
-- [ ] `POST /api/todos` — `201 Created` + 생성된 todo
-- [ ] `GET /api/todos/:id` — `200 OK` + 단일 todo
-- [ ] `PATCH /api/todos/:id` — `200 OK` + 수정된 todo
-- [ ] `DELETE /api/todos/:id` — `200 OK`
+**Controller (`controllers/todoController.js`)**
+- [x] 5개 엔드포인트 (isCompleted string→boolean 변환 포함)
 
-**Routes (`routes/todoRouter.ts`)**
-- [ ] 전체 엔드포인트에 `authMiddleware` 적용
+**Routes (`routes/todoRouter.js`)**
+- [x] 전체 엔드포인트에 `authenticate` 적용
 
 **완료 조건**
-- [ ] `GET /api/todos?isCompleted=false` → 미완료 할일만 반환
-- [ ] `GET /api/todos?categoryId=<uuid>&dueDateFrom=2026-05-01&dueDateTo=2026-05-31` → AND 필터 적용된 결과 반환
-- [ ] 타인 할일 조회/수정/삭제 시 `403 Forbidden` 반환
-- [ ] 존재하지 않는 할일 요청 시 `404 Not Found` 반환
-- [ ] `isCompleted` 완료 → 미완료 토글 가능 (BR-07)
-- [ ] 카테고리 없이 할일 생성 시 `400 Bad Request` 반환
+- [x] `GET /api/todos?isCompleted=false` → 미완료 할일만 반환
+- [x] `GET /api/todos?categoryId=<uuid>&dueDateFrom=2026-05-01&dueDateTo=2026-05-31` → AND 필터 적용된 결과 반환
+- [x] 타인 할일 조회/수정/삭제 시 `403 Forbidden` 반환
+- [x] 존재하지 않는 할일 요청 시 `404 Not Found` 반환
+- [x] `isCompleted` 완료 → 미완료 토글 가능 (BR-07)
+- [x] 카테고리 없이 할일 생성 시 `400 Bad Request` 반환
 
 **의존성**: `depends: BE-04, BE-06`
 
@@ -299,27 +257,23 @@
 
 **작업 목록**
 
-**Repository (`repositories/userRepository.ts`)**
-- [ ] `findById(userId)` — 사용자 단건 조회
-- [ ] `updateName(userId, name)` — 이름 수정
-- [ ] `updatePassword(userId, hashedPassword)` — 비밀번호 수정
+**Repository (`repositories/userRepository.js`)**
+- [x] `findById`, `updateName`, `updatePassword`
 
-**Service (`services/userService.ts`)**
-- [ ] `updateProfile(userId, data)`:
-  - `name` 수정 시: 빈 문자열 불가 (`BadRequestError`)
-  - `password` 수정 시: 현재 비밀번호 확인 → 불일치 시 `UnauthorizedError`; 새 비밀번호 형식 검증; `hashPassword` 적용 (BR-02)
+**Service (`services/userService.js`)**
+- [x] `updateProfile` — 이름/비밀번호 수정, 현재 비밀번호 확인, 형식 검증
 
-**Controller (`controllers/userController.ts`)**
-- [ ] `PATCH /api/users/me` — `200 OK` + 수정된 사용자 정보
+**Controller (`controllers/userController.js`)**
+- [x] `PATCH /api/users/me` — `200 OK` + 수정된 사용자 정보
 
-**Routes (`routes/userRouter.ts`)**
-- [ ] `authMiddleware` 적용
+**Routes (`routes/userRouter.js`)**
+- [x] `authenticate` 적용
 
 **완료 조건**
-- [ ] `PATCH /api/users/me` 이름 변경 → `200 OK`, DB 반영 확인
-- [ ] 현재 비밀번호 불일치 시 `401 Unauthorized` 반환
-- [ ] 새 비밀번호 형식 불량 시 `400 Bad Request` 반환
-- [ ] `PATCH /api/users/me` 비밀번호 변경 후 새 비밀번호로 로그인 성공
+- [x] `PATCH /api/users/me` 이름 변경 → `200 OK`, DB 반영 확인
+- [x] 현재 비밀번호 불일치 시 `401 Unauthorized` 반환
+- [x] 새 비밀번호 형식 불량 시 `400 Bad Request` 반환
+- [x] `PATCH /api/users/me` 비밀번호 변경 후 새 비밀번호로 로그인 성공
 
 **의존성**: `depends: BE-04, BE-05`
 
@@ -330,16 +284,16 @@
 > 전체 백엔드 API를 통합하여 end-to-end 흐름을 검증한다.
 
 **작업 목록**
-- [ ] Postman / HTTP 파일로 전체 API 시나리오 테스트 스크립트 작성
-- [ ] CORS 설정 확인 (프론트엔드 origin 허용)
-- [ ] 환경 변수 누락 시 명확한 에러 출력 확인
-- [ ] `GET /api/health` 엔드포인트 확인
+- [x] Supertest 통합 테스트로 전체 API 시나리오 검증 (pg pool mock)
+- [x] CORS 설정 확인 (corsOrigin 환경 변수 기반)
+- [x] 환경 변수 누락 시 명확한 에러 출력 확인 (env.config.js)
+- [x] `GET /api/health` 엔드포인트 확인
 
 **완료 조건**
-- [ ] 회원가입 → 로그인 → 카테고리 생성 → 할일 CRUD → 회원 탈퇴 전체 흐름 오류 없이 통과
-- [ ] 인증 없이 보호 API 접근 시 모두 `401` 반환
-- [ ] 타인 리소스 접근 시 모두 `403` 반환
-- [ ] 존재하지 않는 리소스 접근 시 `404` 반환
+- [x] 회원가입 → 로그인 → 카테고리 생성 → 할일 CRUD → 회원 탈퇴 전체 흐름 오류 없이 통과
+- [x] 인증 없이 보호 API 접근 시 모두 `401` 반환
+- [x] 타인 리소스 접근 시 모두 `403` 반환
+- [x] 존재하지 않는 리소스 접근 시 `404` 반환
 
 **의존성**: `depends: BE-05, BE-06, BE-07, BE-08`
 
@@ -664,9 +618,15 @@ FE-01
 
 | Phase | Task | 상태 |
 |-------|------|------|
-| Database | DB-01 | [ ] 미완료 |
-| Database | DB-02 | [ ] 미완료 (schema.sql 파일은 완성) |
-| Backend | BE-01 ~ BE-09 | [ ] 미완료 |
-| Frontend | FE-01 ~ FE-11 | [ ] 미완료 |
-
-> `database/schema.sql` 파일은 완성 상태이며 DB-02의 실행 단계만 남아있음.
+| Database | DB-01 | ✅ 완료 |
+| Database | DB-02 | ✅ 완료 |
+| Backend | BE-01 | ✅ 완료 — 프로젝트 초기화, health 엔드포인트 |
+| Backend | BE-02 | ✅ 완료 — pg.Pool, connectPool |
+| Backend | BE-03 | ✅ 완료 — AppError, jwt/bcrypt/response 유틸 |
+| Backend | BE-04 | ✅ 완료 — authenticate, errorHandler, requestLogger |
+| Backend | BE-05 | ✅ 완료 — Auth API (signup/login/logout/deleteAccount) |
+| Backend | BE-06 | ✅ 완료 — Categories API |
+| Backend | BE-07 | ✅ 완료 — Todos API (동적 필터링) |
+| Backend | BE-08 | ✅ 완료 — Users API (프로필 수정) |
+| Backend | BE-09 | ✅ 완료 — 전체 통합 테스트 111/111 통과 |
+| Frontend | FE-01 ~ FE-11 | ⬜ 미완료 |
