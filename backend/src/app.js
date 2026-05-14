@@ -1,7 +1,10 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require(path.join(__dirname, '../../swagger/swagger.json'));
 const config = require('./config/env.config');
 const { successResponse } = require('./utils/response.utils');
 const { AppError } = require('./errors/AppError');
@@ -18,6 +21,9 @@ const app = express();
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 app.use(requestLogger);
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 헬스 체크 엔드포인트
 app.get('/api/health', (req, res) => {

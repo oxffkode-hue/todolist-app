@@ -1,0 +1,140 @@
+{
+  "app": {
+    "name": "TODOLIST",
+    "tagline": "할일 관리 서비스"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "retry": "잠시 후 다시 시도해주세요."
+  },
+  "error": {
+    "passwordMinLength": "비밀번호는 8자 이상이어야 합니다.",
+    "passwordNeedsLetter": "비밀번호에 영문자가 포함되어야 합니다.",
+    "passwordNeedsNumber": "비밀번호에 숫자가 포함되어야 합니다."
+  },
+  "auth": {
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호",
+    "name": "이름",
+    "emailPlaceholder": "example@email.com",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "홍길동",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "loginError": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "passwordConfirm": "비밀번호 확인",
+    "passwordHint": "8자 이상, 영문+숫자 조합",
+    "nameRequired": "이름을 입력해주세요.",
+    "emailRequired": "이메일을 입력해주세요.",
+    "emailInvalid": "올바른 이메일 형식이 아닙니다.",
+    "emailDuplicate": "이미 사용 중인 이메일입니다.",
+    "passwordFormatError": "비밀번호는 8자 이상 영문+숫자 조합이어야 합니다.",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다."
+  },
+  "nav": {
+    "todos": "할일 목록",
+    "categories": "카테고리",
+    "settings": "설정",
+    "menu": "메뉴"
+  },
+  "darkMode": {
+    "switchToLight": "라이트 모드로 전환",
+    "switchToDark": "다크 모드로 전환",
+    "light": "라이트 모드",
+    "dark": "다크 모드"
+  },
+  "language": {
+    "switchTo": "English",
+    "current": "한국어"
+  },
+  "todo": {
+    "listTitle": "할일 목록",
+    "addNew": "+ 새 할일 추가",
+    "summary": "총 {{total}}개 · 미완료 {{pending}}개 · 완료 {{completed}}개",
+    "loadError": "할일을 불러오지 못했습니다.",
+    "deleteTitle": "할일 삭제",
+    "deleteConfirm": "정말 이 할일을 삭제하시겠습니까?",
+    "empty": "할일이 없습니다.",
+    "emptyFiltered": "조건에 맞는 할일이 없습니다.",
+    "emptyHint": "필터를 변경하거나 새 할일을 추가해 보세요.",
+    "unknownCategory": "알 수 없음",
+    "noDueDate": "기간 없음",
+    "markComplete": "완료로 변경",
+    "markIncomplete": "미완료로 변경",
+    "editTitle": "할일 수정",
+    "createTitle": "새 할일 추가",
+    "close": "닫기",
+    "titleLabel": "제목 *",
+    "titlePlaceholder": "할일 제목을 입력하세요",
+    "titleRequired": "제목을 입력해주세요.",
+    "descLabel": "설명",
+    "descPlaceholder": "상세 내용을 입력하세요 (선택 사항)",
+    "categoryLabel": "카테고리 *",
+    "categoryPlaceholder": "카테고리 선택",
+    "categoryRequired": "카테고리를 선택해주세요.",
+    "dueDateLabel": "종료예정일",
+    "forbiddenError": "이 할일을 수정할 권한이 없습니다.",
+    "saveAction": "저장",
+    "editAction": "수정"
+  },
+  "filter": {
+    "title": "필터",
+    "reset": "초기화",
+    "category": "카테고리",
+    "allCategory": "전체",
+    "completion": "완료 여부",
+    "all": "전체",
+    "incomplete": "미완료",
+    "complete": "완료",
+    "dueDate": "종료예정일"
+  },
+  "category": {
+    "pageTitle": "카테고리",
+    "defaultSection": "기본 카테고리",
+    "mySection": "내 카테고리",
+    "defaultNames": {
+      "업무": "업무",
+      "개인": "개인",
+      "기타": "기타"
+    },
+    "defaultHint": "기본 카테고리는 수정/삭제할 수 없습니다.",
+    "addNew": "+ 카테고리 추가",
+    "noCustom": "사용자 정의 카테고리가 없습니다.",
+    "nameLabel": "카테고리 이름",
+    "namePlaceholder": "카테고리명 입력",
+    "iconLabel": "아이콘",
+    "duplicateError": "이미 사용 중인 카테고리 이름입니다.",
+    "hasTodosError": "할일이 존재하는 카테고리는 삭제할 수 없습니다.",
+    "deleteError": "삭제 중 오류가 발생했습니다."
+  },
+  "profile": {
+    "title": "프로필 설정",
+    "nameSection": "이름 변경",
+    "nameLabel": "이름",
+    "changeNameBtn": "이름 변경",
+    "nameSuccess": "이름이 변경되었습니다.",
+    "nameError": "이름 변경에 실패했습니다.",
+    "passwordSection": "비밀번호 변경",
+    "currentPassword": "현재 비밀번호",
+    "newPassword": "새 비밀번호",
+    "newPasswordConfirm": "새 비밀번호 확인",
+    "changePasswordBtn": "비밀번호 변경",
+    "passwordSuccess": "비밀번호가 변경되었습니다.",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+    "wrongCurrentPassword": "현재 비밀번호가 올바르지 않습니다.",
+    "passwordChangeError": "비밀번호 변경에 실패했습니다.",
+    "dangerSection": "계정 삭제 (위험 구역)",
+    "dangerDesc": "계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.",
+    "deleteAccountBtn": "회원 탈퇴",
+    "deleteModalTitle": "회원 탈퇴",
+    "deleteModalDesc": "탈퇴 시 모든 데이터가 영구 삭제됩니다.",
+    "deletePasswordLabel": "비밀번호",
+    "confirmDeleteBtn": "탈퇴하기"
+  }
+}

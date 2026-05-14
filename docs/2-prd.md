@@ -6,9 +6,9 @@
 | 항목 | 내용 |
 |------|------|
 | 문서 제목 | 할일 관리 애플리케이션 PRD |
-| 버전 | v1.1 |
-| 작성일 | 2026-05-13 |
-| 상태 | Draft |
+| 버전 | v1.2 |
+| 작성일 | 2026-05-14 |
+| 상태 | Approved |
 | 작성자 | Product Manager |
 
 ---
@@ -19,6 +19,8 @@
 |------|------|--------|----------|
 | v1.0 | 2026-05-12 | Product Manager | 최초 작성 — 기능 요구사항, 비기능 요구사항, 기술 아키텍처, UI/UX, 출시 계획 포함 |
 | v1.1 | 2026-05-13 | Product Manager | 검토 반영 — UC-09(회원탈퇴) 추가, 기본 카테고리 목록 확정, 비밀번호 정책 필수화, Category.updated_at 추가, UC별 수락 기준(AC) 추가, isCompleted 양방향 토글 명시, CASCADE DELETE 확정 |
+| v1.2 | 2026-05-14 | Product Manager | 구현 반영 — AC-08-3 응답코드 400으로 수정(할일 있는 카테고리 삭제 시 BadRequest), 상태 Approved 전환 |
+| v1.3 | 2026-05-14 | Product Manager | 1차 릴리즈 후 기능 추가 — 다국어 지원(i18n, 한국어/영어), 다크모드 색상 시스템 개편, SVG 아이콘 적용 |
 
 ---
 
@@ -86,7 +88,7 @@
 | Must Have | 회원 탈퇴 | UC-09 |
 | Should Have | 개인정보 수정 | UC-03 |
 | Could Have | 다크 모드 | - |
-| Could Have | 다국어 지원 | - |
+| Should Have | 다국어 지원 (i18n) | UC-10 |
 | Could Have | OAuth 소셜 로그인 | - |
 
 ### 4.2 기능별 상세 요구사항
@@ -277,7 +279,7 @@
 **수락 기준 (AC):**
 - AC-08-1: Given 신규 카테고리 이름 입력 When 생성 요청 Then 201 Created + 카테고리 반환
 - AC-08-2: Given 동일 사용자가 이미 사용 중인 이름 입력 When 생성 요청 Then 409 Conflict 반환
-- AC-08-3: Given 할일이 존재하는 카테고리 When 삭제 요청 Then 409 Conflict 반환
+- AC-08-3: Given 할일이 존재하는 카테고리 When 삭제 요청 Then 400 Bad Request 반환
 - AC-08-4: Given 기본 카테고리 When 수정/삭제 요청 Then 403 Forbidden 반환
 
 ---
@@ -308,6 +310,35 @@
 
 ---
 
+#### UC-10: 다국어 지원 (i18n) 및 언어 설정
+
+**설명:** 사용자가 로그인한 후 선호하는 언어(한국어/영어)를 선택하여 UI 전체를 해당 언어로 변환한다.
+
+**기본 흐름:**
+1. 로그인 시 사용자의 저장된 언어 설정(`users.language`)을 조회한다.
+2. 프론트엔드는 i18n 라이브러리(`react-i18next`)를 초기화할 때 사용자의 언어로 설정한다.
+3. 사용자가 언어 설정 페이지에서 언어를 선택하면 `PATCH /api/users/me`로 `language` 필드를 업데이트한다.
+4. 성공 시 프론트엔드는 즉시 UI 언어를 전환한다.
+
+**지원 언어:**
+- 한국어 (ko) — 기본값
+- 영어 (en)
+
+**비즈니스 규칙:** BR-14
+
+**기본 카테고리명 다국어 처리:**
+- DB에는 기본 카테고리 이름이 고정된 한국어 이름(업무, 개인, 기타)으로 저장된다.
+- 프론트엔드는 카테고리 렌더링 시 `getCategoryDisplayName(category, t)` 유틸 함수를 사용하여 i18n 번역 키로 변환한다.
+- 기본 카테고리: `category.defaultNames.work`, `category.defaultNames.personal`, `category.defaultNames.etc`
+
+**수락 기준 (AC):**
+- AC-10-1: Given 한국어 사용자 로그인 When 페이지 진입 Then 모든 UI가 한국어로 표시됨
+- AC-10-2: Given 영어로 언어 변경 선택 When `PATCH /api/users/me` 호출 Then 200 OK + 모든 UI가 영어로 전환
+- AC-10-3: Given 새로운 사용자 회원가입 When 기본값 ko 저장 Then 로그인 후 한국어 UI 표시
+- AC-10-4: Given 기본 카테고리 렌더링 When 프론트엔드 언어 en 전환 Then 기본 카테고리 이름도 영어로 표시
+
+---
+
 ### 4.3 비즈니스 규칙 요약
 
 | BR 번호 | 규칙 내용 |
@@ -325,6 +356,7 @@
 | BR-11 | 할일이 존재하는 카테고리는 삭제 불가 |
 | BR-12 | 카테고리/기간/완료 여부 단독 또는 복합 필터링 지원 |
 | BR-13 | 기간 필터는 dueDate 필드를 기준으로 적용 |
+| BR-14 | 사용자 언어 설정은 users.language에 저장하며 로그인 시 복원된다. 기본값은 'ko' |
 
 ---
 
@@ -360,8 +392,8 @@
 | 항목 | 내용 |
 |------|------|
 | OAuth 소셜 로그인 | 2차 릴리즈 확장 대비, 인증 레이어를 전략 패턴으로 설계 권장 |
-| 다크 모드 | CSS 변수 기반 테마 설계로 2차 전환 용이하게 구성 |
-| 다국어 지원 | i18n 라이브러리 도입 여지를 남기되 1차에서는 한국어 단일 적용 |
+| 다크 모드 | CSS 변수 기반 테마 설계로 2차 전환 용이하게 구성 (현재는 라이트모드만 구현) |
+| 다국어 지원 | react-i18next 라이브러리 도입, 1차 릴리즈에서 한국어(ko) 및 영어(en) 지원 |
 
 ---
 
@@ -420,6 +452,8 @@ id          UUID        PK
 email       VARCHAR     UNIQUE NOT NULL
 password    VARCHAR     NOT NULL  (bcrypt hash)
 name        VARCHAR     NOT NULL
+dark_mode   BOOLEAN     DEFAULT false
+language    VARCHAR(10) NOT NULL DEFAULT 'ko'
 created_at  TIMESTAMP   DEFAULT NOW()
 updated_at  TIMESTAMP   DEFAULT NOW()
 ```
@@ -477,9 +511,9 @@ updated_at    TIMESTAMP   DEFAULT NOW()
 
 | 기능 | 릴리즈 |
 |------|-------|
-| 다크 모드 | 2차 릴리즈 |
-| 다국어 지원 (영어 등) | 2차 릴리즈 |
+| 다크 모드 기능 (현재는 CSS 변수 체계만 준비됨) | 2차 릴리즈 |
 | OAuth 소셜 로그인 UI | 2차 릴리즈 |
+| 추가 언어 지원 (스페인어, 중국어 등) | 2차 릴리즈 |
 
 ---
 

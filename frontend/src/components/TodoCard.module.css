@@ -1,0 +1,124 @@
+.card {
+  background: var(--color-surface);
+  border: var(--border-default);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  transition: box-shadow 0.15s ease, border-left-color 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-left-color: var(--color-amber);
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkbox:hover {
+  border-color: var(--color-amber);
+  transform: scale(1.08);
+}
+
+.checked {
+  background: var(--color-amber);
+  border-color: var(--color-amber);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.completed .title {
+  text-decoration: line-through;
+  color: var(--color-text-disabled);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-label);
+  text-transform: uppercase;
+}
+
+.badgeDefault {
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  border: var(--border-default);
+}
+
+.badgeCustom {
+  background: var(--color-amber-light);
+  color: var(--color-amber-dark);
+}
+
+.dueDate {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+  border-color: var(--color-dark);
+  color: var(--color-dark);
+}
+
+.danger {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.danger:hover {
+  background: var(--color-error);
+  color: white;
+}

@@ -15,6 +15,8 @@ CREATE TABLE users (
     email       VARCHAR(255)    NOT NULL,
     password    VARCHAR(255)    NOT NULL,
     name        VARCHAR(100)    NOT NULL,
+    dark_mode   BOOLEAN         NOT NULL DEFAULT false,
+    language    VARCHAR(10)     NOT NULL DEFAULT 'ko',
     created_at  TIMESTAMP       NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP       NOT NULL DEFAULT NOW(),
 
@@ -29,6 +31,7 @@ CREATE TABLE categories (
     id          UUID            NOT NULL DEFAULT gen_random_uuid(),
     user_id     UUID,                           -- NULL = 시스템 기본 카테고리
     name        VARCHAR(100)    NOT NULL,
+    icon        VARCHAR(30)     NOT NULL DEFAULT 'folder',
     is_default  BOOLEAN         NOT NULL DEFAULT false,
     created_at  TIMESTAMP       NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP       NOT NULL DEFAULT NOW(),

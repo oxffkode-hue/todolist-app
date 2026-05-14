@@ -44,9 +44,71 @@
 
 ---
 
-## 2. 의존성 / 레이어 원칙
+## 2. 다국어(i18n) 설계 원칙
 
-### 2.1 레이어 간 의존 방향 규칙
+### 2.1 i18n 아키텍처
+
+**프론트엔드는 `react-i18next`를 사용하여 다국어를 지원한다.**
+
+- **라이브러리**: `react-i18next` (React 통합) + `i18next` (코어)
+- **지원 언어**: 한국어(ko, 기본값), 영어(en)
+- **번역 파일 위치**: `frontend/src/locales/{ko,en}.json`
+- **초기화**: `frontend/src/i18n.ts`에서 리소스 로드 및 언어 설정
+- **사용**: 모든 컴포넌트에서 `const { t } = useTranslation()` hook 사용
+
+### 2.2 백엔드-프론트엔드 언어 동기화
+
+**사용자의 언어 선택은 DB(`users.language`)에 저장되며, 로그인 시 복원된다.**
+
+- **저장**: `PATCH /api/users/me` 요청 시 `language` 필드 업데이트
+- **복원**: `POST /api/auth/login` 응답에 `language: user.language ?? 'ko'` 포함
+- **초기화**: 회원가입 후 기본값 `'ko'` 저장
+- **변환**: Repository 레이어에서 모든 RETURNING 절에 `language` 포함
+
+### 2.3 다국어 텍스트 관리 원칙
+
+**모든 UI 문자열은 i18n 번역 키로 처리한다. 코드에 하드코딩된 텍스트를 금지한다.**
+
+| 대상 | 처리 방식 |
+|------|---------|
+| 페이지 헤더, 버튼, 레이블 | `i18n/{lang}.json`에 정의하고 `t('key')` 사용 |
+| 기본 카테고리 이름 | DB에는 한국어 이름 저장, 렌더링 시 `getCategoryDisplayName(category, t)` 함수로 i18n 번역 |
+| 에러 메시지 | API에서 받은 code/message 기반, 또는 프론트엔드 `i18n/{lang}.json`에서 조회 |
+| 날짜 입력 placeholder | `t('filter.datePlaceholder')` 등으로 언어별 형식 제공 |
+
+### 2.4 기본 카테고리명 i18n 처리
+
+**기본 카테고리는 세 가지로 고정되며, DB에는 한국어 이름이 저장된다.**
+
+```json
+{
+  "category": {
+    "defaultNames": {
+      "work": "Work",
+      "personal": "Personal",
+      "etc": "Etc"
+    }
+  }
+}
+```
+
+프론트엔드에서 기본 카테고리 렌더링 시:
+```typescript
+function getCategoryDisplayName(category, t) {
+  if (category.isDefault) {
+    if (category.name === '업무') return t('category.defaultNames.work');
+    if (category.name === '개인') return t('category.defaultNames.personal');
+    if (category.name === '기타') return t('category.defaultNames.etc');
+  }
+  return category.name; // 사용자 정의 카테고리는 그대로
+}
+```
+
+---
+
+## 3. 의존성 / 레이어 원칙
+
+### 3.1 레이어 간 의존 방향 규칙
 
 **의존 방향은 단방향으로 고정한다. 역방향 참조는 순환 의존을 유발하므로 절대 금지한다.**
 
@@ -110,7 +172,65 @@
 
 ---
 
-## 3. 코드 / 네이밍 원칙
+## 4. 스타일 시스템 및 CSS 변수 원칙
+
+### 4.1 CSS 변수 기반 테마 설계
+
+**모든 색상, 타이포그래피, 간격은 CSS 변수로 관리되어 테마 전환을 용이하게 한다.**
+
+CSS 변수는 `frontend/src/index.css`의 `:root` 선택자에서 선언되며, 컴포넌트 스타일에서 `var(--color-*)`, `var(--space-*)` 형태로 참조한다.
+
+### 4.2 라이트모드 색상 시스템
+
+**현재 1차 릴리즈에서는 라이트모드만 구현되었다.**
+
+| 변수명 | 값 | 용도 |
+|--------|-----|------|
+| `--color-bg` | `#F7F6F3` | 페이지 배경 |
+| `--color-border` | `#D8D8D4` | 보더, 구분선 |
+| `--color-dark` | `#111111` | 메인 텍스트, 헤더 배경 |
+
+**헤더/사이드바 전용 변수:**
+- `--color-nav-bg`: 라이트모드 `#FFFFFF` (헤더/네비게이션 배경)
+- `--color-nav-text`: 라이트모드 `#111111` (헤더 텍스트)
+- `--color-nav-text-muted`: 라이트모드 `#7A7A78` (헤더 보조 텍스트)
+- `--color-nav-hover`: 라이트모드 hover 배경
+- `--color-nav-border`: 라이트모드 `#D8D8D4` (헤더 하단 보더)
+
+**사이드바 전용 변수:**
+- `--color-sidebar-bg`: 라이트모드 `#FFFFFF`, 다크모드 `#111111`
+- `--color-sidebar-text`: 라이트모드 `#111111`, 다크모드 `#FFFFFF`
+- `--color-sidebar-text-muted`: 라이트모드 `#7A7A78`, 다크모드 투명 흰색
+- `--color-sidebar-hover`: hover 배경 색
+- `--color-sidebar-border`: `#D8D8D4` / 다크모드 진하게
+
+### 4.3 다크모드 확장 (미구현, 2차 릴리즈 예정)
+
+향후 다크모드 구현 시 CSS 변수만 재정의하면 되도록 설계되었다:
+```css
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0A0A0A;
+    --color-nav-bg: #0A0A0A;
+    --color-sidebar-bg: #111111;
+    /* ... 다크모드 색상 정의 ... */
+  }
+}
+```
+
+### 4.4 아이콘 시스템
+
+**SVG 아이콘 사용으로 스케일 가능성을 확보했다.**
+
+| 컴포넌트 | 아이콘 | 위치 |
+|---------|--------|------|
+| 기본 카테고리 | `TagIcon` (앰버 색) | `frontend/src/components/common/CategoryIcons.tsx` |
+| 사용자 정의 카테고리 | `FolderIcon` | 동일 파일 |
+| 폼 select option | `▪` / `▫` (유니코드) | `TodoForm.tsx` option |
+
+---
+
+## 5. 코드 / 네이밍 원칙
 
 ### 3.1 파일명 컨벤션
 
@@ -120,7 +240,9 @@
 | React 페이지 파일 | PascalCase + `Page` 접미사 | `LoginPage.tsx`, `TodoListPage.tsx` |
 | 훅 파일 | camelCase + `use` 접두사 | `useAuth.ts`, `useTodoFilter.ts` |
 | 스토어 파일 | camelCase + `Store` 접미사 | `authStore.ts`, `uiStore.ts` |
-| 서비스/레포지토리/컨트롤러 | camelCase + 역할 접미사 | `todoService.ts`, `todoRepository.ts`, `todoController.ts` |
+| 서비스/레포지토리/컨트롤러 (백엔드 JS) | camelCase + 역할 접미사 | `todoService.js`, `todoRepository.js`, `todoController.js` |
+| 라우터 파일 (백엔드 JS) | camelCase + `Router` 접미사 | `authRouter.js`, `todoRouter.js` |
+| 서비스/레포지토리/컨트롤러 (프론트엔드 TS) | camelCase + 역할 접미사 | `todoService.ts`, `todoRepository.ts`, `todoController.ts` |
 | 타입 정의 파일 | camelCase + `.types.ts` | `todo.types.ts`, `auth.types.ts` |
 | 상수 파일 | camelCase + `.constants.ts` | `http.constants.ts`, `error.constants.ts` |
 | 유틸리티 파일 | camelCase + `.utils.ts` | `date.utils.ts`, `jwt.utils.ts` |
@@ -185,7 +307,8 @@ function mapRowToTodo(row) {
 | PATCH | `/api/users/me` | 개인정보 수정 |
 
 - 버전 관리: 현재는 `/api` prefix만 사용. 하위 호환 불가 변경 발생 시 `/api/v2`로 확장한다.
-- 필터 파라미터: 쿼리 스트링 사용 (`GET /api/todos?categoryId=uuid&isCompleted=false&dueDate=2026-05-13`)
+- 필터 파라미터: 쿼리 스트링 사용 (`GET /api/todos?categoryId=uuid&isCompleted=false&dueDateFrom=2026-05-01&dueDateTo=2026-05-31`)
+- 기간 필터는 `dueDate` 단일 값이 아닌 `dueDateFrom`(시작일 이상) + `dueDateTo`(종료일 이하) 두 파라미터를 AND 조건으로 적용한다.
 
 ### 3.5 TypeScript 타입 / 인터페이스 네이밍 규칙 (프론트엔드 전용)
 
@@ -283,7 +406,7 @@ describe('UC-04: 할일 등록', () => {
 
 ---
 
-## 5. 설정 / 보안 / 운영 원칙
+## 6. 설정 / 보안 / 운영 원칙
 
 ### 5.1 환경 변수 관리 원칙
 
@@ -369,16 +492,16 @@ HTTP 상태코드 표준화:
 
 ### 5.6 로깅 원칙
 
-- **구조화 로깅**: JSON 형식으로 로그를 출력한다. `winston` 또는 `pino` 사용.
-- **로그 레벨**: `error`(시스템 오류), `warn`(비정상 상황), `info`(주요 이벤트), `debug`(개발용)
-- **요청 로그**: 모든 HTTP 요청에 대해 메서드, 경로, 상태코드, 응답시간을 기록한다.
-- **에러 로그**: 에러 발생 시 상태코드, 에러 코드, 스택 트레이스를 기록한다.
-- **민감 정보 로깅 금지**: 비밀번호, JWT 토큰, 개인정보(이메일 일부 마스킹)는 로그에 포함하지 않는다.
-- **상관 ID(Correlation ID)**: 요청마다 고유 ID를 생성하여 요청-응답 추적이 가능하도록 한다.
+- **현재 구현**: `console.log` / `console.warn` / `console.error`를 사용한다. (향후 `winston` 또는 `pino`로 교체 검토)
+- **로그 레벨 관례**: `console.log` → 정상 흐름(info), `console.warn` → 비정상 상황(경고), `console.error` → 시스템 오류
+- **요청 로그**: `requestLogger` 미들웨어가 모든 요청의 메서드, 경로, 응답 상태코드를 `[METHOD] /path → statusCode` 형식으로 기록한다.
+- **서비스 로그**: 서비스 레이어에서 주요 시작/성공/실패 지점을 `[Domain] action: key=value` 형식으로 기록한다. (예: `[Auth] login success: userId=xxx email=xxx`)
+- **민감 정보 로깅 금지**: 비밀번호, JWT 토큰은 절대 로그에 포함하지 않는다.
+- **에러 로그**: 프로덕션 환경에서는 AppError 이외의 예외만 `console.error`로 출력하고 스택 트레이스는 서버 로그에만 기록한다.
 
 ---
 
-## 6. 프론트엔드 디렉토리 구조
+## 7. 프론트엔드 디렉토리 구조
 
 ```
 frontend/
@@ -405,7 +528,8 @@ frontend/
 │   │   │   ├── Input.tsx
 │   │   │   ├── Modal.tsx
 │   │   │   ├── Spinner.tsx
-│   │   │   └── ErrorMessage.tsx
+│   │   │   ├── ErrorMessage.tsx
+│   │   │   └── CategoryIcons.tsx    # SVG 아이콘: TagIcon(기본), FolderIcon(커스텀)
 │   │   ├── todos/                  # 할일 도메인 컴포넌트
 │   │   │   ├── TodoCard.tsx        # 할일 카드 단위 컴포넌트
 │   │   │   ├── TodoList.tsx        # 할일 목록 렌더링
@@ -434,7 +558,8 @@ frontend/
 │   ├── mutations/                  # TanStack Query — mutationFn 정의 (서버 데이터 변경)
 │   │   ├── todoMutations.ts        # useCreateTodo, useUpdateTodo, useDeleteTodo
 │   │   ├── categoryMutations.ts    # useCreateCategory, useUpdateCategory, useDeleteCategory
-│   │   └── authMutations.ts        # useLogin, useSignup, useLogout, useDeleteAccount
+│   │   ├── authMutations.ts        # useLogin, useSignup, useLogout, useDeleteAccount
+│   │   └── useToggleLanguageMutation.ts # 언어 설정 변경 (PATCH /api/users/me language 필드)
 │   │
 │   ├── api/                        # axios 인스턴스 및 엔드포인트별 API 함수
 │   │   ├── axiosInstance.ts        # axios 인스턴스 생성, 인터셉터 설정 (토큰 갱신)
@@ -442,6 +567,12 @@ frontend/
 │   │   ├── categoryApi.ts          # categories 엔드포인트 호출 함수
 │   │   ├── authApi.ts              # auth 엔드포인트 호출 함수
 │   │   └── userApi.ts              # users 엔드포인트 호출 함수
+│   │
+│   ├── i18n.ts                     # i18n 초기화 (react-i18next 설정)
+│   │
+│   ├── locales/                    # 다국어 번역 파일 (JSON)
+│   │   ├── ko.json                 # 한국어 번역
+│   │   └── en.json                 # 영어 번역
 │   │
 │   ├── hooks/                      # 도메인 무관 커스텀 훅
 │   │   ├── useDebounce.ts          # 입력 디바운스 훅
@@ -461,7 +592,8 @@ frontend/
 │   │
 │   └── utils/                      # 순수 유틸리티 함수
 │       ├── date.utils.ts           # 날짜 포맷 유틸리티
-│       └── validation.utils.ts     # 입력 유효성 검사 함수
+│       ├── validation.utils.ts     # 입력 유효성 검사 함수
+│       └── categoryName.ts         # getCategoryDisplayName(category, t) — i18n 기반 카테고리명 변환
 │
 ├── .env.example                    # 환경 변수 키 템플릿
 ├── index.html
@@ -489,80 +621,80 @@ frontend/
 
 ---
 
-## 7. 백엔드 디렉토리 구조
+## 8. 백엔드 디렉토리 구조
 
 ```
 backend/
 ├── src/
-│   ├── index.js                         # 서버 진입점, 환경 변수 검증, app.listen
-│   ├── app.js                           # Express 앱 설정, 미들웨어 등록, 라우터 마운트
+│   ├── index.js                         # 서버 진입점 — connectPool 후 app.listen
+│   ├── app.js                           # Express 앱 설정, 미들웨어 등록, 라우터 마운트, Swagger UI
 │   │
 │   ├── routes/                          # Express 라우터 — URL 경로와 Controller 연결만 담당
-│   │   ├── auth.routes.js               # /api/auth/* 경로 정의
-│   │   ├── todo.routes.js               # /api/todos/* 경로 정의
-│   │   ├── category.routes.js           # /api/categories/* 경로 정의
-│   │   └── user.routes.js               # /api/users/* 경로 정의
+│   │   ├── authRouter.js                # /api/auth/* 경로 정의
+│   │   ├── todoRouter.js                # /api/todos/* 경로 정의
+│   │   ├── categoryRouter.js            # /api/categories/* 경로 정의
+│   │   └── userRouter.js                # /api/users/* 경로 정의
 │   │
 │   ├── controllers/                     # HTTP 요청/응답 처리 — 입력 추출, Service 호출, 응답 반환
-│   │   ├── auth.controller.js           # signup, login, logout, deleteAccount
-│   │   ├── todo.controller.js           # createTodo, getTodos, getTodoById, updateTodo, deleteTodo
-│   │   ├── category.controller.js       # createCategory, getCategories, updateCategory, deleteCategory
-│   │   └── user.controller.js           # updateProfile
+│   │   ├── authController.js            # signup, login, logout, deleteAccount
+│   │   ├── todoController.js            # createTodo, getTodos, getTodoById, updateTodo, deleteTodo
+│   │   ├── categoryController.js        # createCategory, getCategories, updateCategory, deleteCategory
+│   │   └── userController.js            # updateProfile
 │   │
 │   ├── services/                        # 비즈니스 로직 — 도메인 규칙, 권한 검사, 트랜잭션 조율
-│   │   ├── auth.service.js              # 회원가입(bcrypt), 로그인(JWT 발급), 탈퇴
-│   │   ├── todo.service.js              # 할일 CRUD 규칙, 소유권 검사, 필터 처리
-│   │   ├── category.service.js          # 기본 카테고리 수정/삭제 방어, 소유권 검사
-│   │   └── user.service.js              # 개인정보 수정, 비밀번호 변경
+│   │   ├── authService.js               # 회원가입(bcrypt), 로그인(JWT 발급), 탈퇴
+│   │   ├── todoService.js               # 할일 CRUD 규칙, 소유권 검사, 필터 처리
+│   │   ├── categoryService.js           # 기본 카테고리 수정/삭제 방어, 소유권 검사
+│   │   └── userService.js               # 개인정보 수정, 비밀번호 변경
 │   │
 │   ├── repositories/                    # DB 접근 — pg Raw SQL 실행, 결과 매핑 (snake_case → camelCase)
-│   │   ├── user.repository.js           # users 테이블 CRUD 쿼리
-│   │   ├── todo.repository.js           # todos 테이블 CRUD + 필터 쿼리
-│   │   └── category.repository.js       # categories 테이블 CRUD 쿼리
+│   │   ├── authRepository.js            # users 테이블 — auth 전용 쿼리 (findByEmail, createUser, deleteUser)
+│   │   ├── userRepository.js            # users 테이블 — 프로필 수정 쿼리 (findById, updateName, updatePassword)
+│   │   ├── todoRepository.js            # todos 테이블 CRUD + 동적 필터 쿼리
+│   │   └── categoryRepository.js        # categories 테이블 CRUD 쿼리
 │   │
 │   ├── middlewares/                     # Express 미들웨어
-│   │   ├── authenticate.middleware.js   # JWT Access Token 검증, req.user 주입
-│   │   ├── validate.middleware.js       # 요청 바디/쿼리 유효성 검사
-│   │   ├── errorHandler.middleware.js   # 전역 에러 핸들러 — 도메인 에러 → HTTP 응답 변환
-│   │   └── requestLogger.middleware.js  # 요청/응답 구조화 로깅
+│   │   ├── authenticate.js              # JWT Access Token 검증, req.user 주입 (TOKEN_MISSING / TOKEN_INVALID)
+│   │   ├── errorHandler.js              # 전역 에러 핸들러 — AppError → HTTP 응답 변환, 500 fallback
+│   │   └── requestLogger.js             # [METHOD] /path → statusCode 형식 응답 로깅
 │   │
-│   ├── db/                              # DB 연결 설정 및 마이그레이션
-│   │   ├── pool.js                      # pg Pool 인스턴스 생성 및 내보내기
-│   │   └── migrations/                  # SQL 마이그레이션 파일 (순번 관리)
-│   │       ├── 001_create_users.sql
-│   │       ├── 002_create_categories.sql
-│   │       └── 003_create_todos.sql
+│   ├── db/                              # DB 연결 설정
+│   │   ├── pool.js                      # pg.Pool 인스턴스 생성, connectPool() export
+│   │   └── migrations/                  # SQL 마이그레이션 파일 (database/schema.sql 참고)
 │   │
 │   ├── config/                          # 환경 변수 파싱 및 설정 객체 내보내기
-│   │   └── env.config.js                # 환경 변수 검증, 설정 객체 export
+│   │   └── env.config.js                # JWT_SECRET, POSTGRES_CONNECTION_STRING 필수 검증; 누락 시 process.exit(1)
 │   │
 │   ├── errors/                          # 도메인 에러 클래스 정의
-│   │   └── AppError.js                  # AppError, NotFoundError, ForbiddenError, ConflictError, UnauthorizedError
+│   │   └── AppError.js                  # AppError(base), BadRequestError(400), UnauthorizedError(401),
+│   │                                    # ForbiddenError(403), NotFoundError(404), ConflictError(409)
 │   │
 │   └── utils/                           # 순수 유틸리티 함수
-│       ├── jwt.utils.js                 # JWT 생성/검증 래퍼 함수
-│       ├── password.utils.js            # bcrypt hash/compare 래퍼 함수
-│       └── response.utils.js            # 표준 응답 객체 생성 헬퍼 (success, error)
+│       ├── jwt.utils.js                 # signToken(payload) / verifyToken(token) — 만료 1h
+│       ├── password.utils.js            # hashPassword(plain) / comparePassword(plain, hash) — salt 12
+│       ├── response.utils.js            # successResponse(data) / errorResponse(code, message)
+│       └── db.utils.js                  # toCamel(row) — snake_case → camelCase 변환 (Repository 전용)
 │
 ├── tests/
-│   ├── unit/                            # Service 단위 테스트 (Repository mock)
-│   │   ├── auth.service.test.js
-│   │   ├── todo.service.test.js
-│   │   └── category.service.test.js
-│   ├── integration/                     # API 통합 테스트 (Supertest + 테스트 DB)
-│   │   ├── auth.test.js
-│   │   ├── todo.test.js
-│   │   └── category.test.js
-│   └── helpers/
-│       ├── testDb.js                    # 테스트 DB 초기화, 트랜잭션 롤백 헬퍼
-│       └── testApp.js                   # 테스트용 Express 앱 인스턴스
+│   ├── unit/                            # 단위 테스트 (pg pool mock)
+│   │   ├── db/pool.test.js
+│   │   ├── errors/AppError.test.js
+│   │   ├── utils/{jwt,password,response}.test.js
+│   │   └── middlewares/{authenticate,errorHandler,requestLogger}.test.js
+│   └── integration/                     # API 통합 테스트 (Supertest + jest.mock(pool))
+│       ├── health.test.js
+│       ├── auth.test.js
+│       ├── categories.test.js
+│       ├── todos.test.js
+│       └── users.test.js
 │
 ├── .env.example                         # 환경 변수 키 템플릿 (값 없음)
 ├── .env                                 # 로컬 환경 변수 (git 제외)
-├── eslint.config.js
 ├── jest.config.js
 └── package.json
 ```
+
+> **파일명 규칙 (백엔드 JavaScript)**: Routes는 `camelCase + Router` 접미사(`authRouter.js`), Controllers/Services/Repositories는 `camelCase + 역할 접미사`(`authController.js`, `authService.js`, `authRepository.js`), Middlewares는 기능명만(`authenticate.js`, `errorHandler.js`).
 
 ### 백엔드 레이어별 핵심 규칙 요약
 
@@ -573,6 +705,8 @@ backend/
 | Services | `services/` | 금지 | 금지 | **필수** |
 | Repositories | `repositories/` | **필수** | 금지 | 금지 |
 | Middlewares | `middlewares/` | 금지 | 허용 | 최소한 |
+
+> **유효성 검사 위치**: 별도 `validate.middleware.js` 없이, Controller(입력 형식 변환)와 Service(비즈니스 규칙 위반)에서 나누어 처리한다. 예: `isCompleted` string→boolean 변환은 Controller에서, 카테고리 소유권 검사는 Service에서 수행한다.
 
 ---
 

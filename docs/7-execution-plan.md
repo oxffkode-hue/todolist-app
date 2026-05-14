@@ -306,9 +306,9 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > Vite + React 19 + TypeScript 기반 프론트엔드 프로젝트를 생성한다.
 
 **작업 목록**
-- [ ] `npm create vite@latest frontend -- --template react-ts`
-- [ ] 패키지 설치: `axios`, `react-router-dom`, `zustand`, `@tanstack/react-query`
-- [ ] 디렉토리 구조 생성:
+- [x] `npm create vite@latest frontend -- --template react-ts` (Vite 8.0.12 + React 19.2.6 + TS 6.0.3)
+- [x] 패키지 설치: `axios`, `react-router-dom`, `zustand`, `@tanstack/react-query` (최신 버전)
+- [x] 디렉토리 구조 생성:
   ```
   frontend/src/
   ├── pages/
@@ -323,13 +323,13 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
   ├── constants/
   └── utils/
   ```
-- [ ] `.env` 파일: `VITE_API_BASE_URL` 설정
-- [ ] ESLint + Prettier 설정
-- [ ] `tsconfig.json` strict mode 활성화
+- [x] `.env` 파일: `VITE_API_BASE_URL=http://localhost:3000/api` 설정 (+ `.env.example`)
+- [x] ESLint + Prettier 설정 (eslint-config-prettier 통합)
+- [x] `tsconfig.app.json` strict mode 활성화
 
 **완료 조건**
-- [ ] `npm run dev` 실행 시 브라우저에서 기본 페이지 렌더링 성공
-- [ ] TypeScript 컴파일 오류 없음
+- [x] `npm run dev` 실행 시 http://localhost:5173 HTTP 200 응답 확인
+- [x] TypeScript 컴파일 오류 없음 (`npm run build` 성공)
 
 **의존성**: 없음
 
@@ -340,20 +340,23 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > TypeScript 타입 정의, axios 인스턴스(JWT 인터셉터), 공통 상수를 설정한다.
 
 **작업 목록**
-- [ ] `types/user.types.ts` — `User`, `LoginRequest`, `SignupRequest`
-- [ ] `types/todo.types.ts` — `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `TodoFilters`
-- [ ] `types/category.types.ts` — `Category`, `CreateCategoryRequest`, `UpdateCategoryRequest`
-- [ ] `api/axiosInstance.ts` — baseURL 설정, `Authorization: Bearer <token>` 요청 인터셉터, `401` 응답 시 authStore 초기화 + 로그인 페이지 이동
-- [ ] `api/auth.api.ts` — signup, login, logout, deleteAccount 함수
-- [ ] `api/todos.api.ts` — getTodos, getTodoById, createTodo, updateTodo, deleteTodo 함수
-- [ ] `api/categories.api.ts` — getCategories, createCategory, updateCategory, deleteCategory 함수
-- [ ] `api/users.api.ts` — updateProfile 함수
-- [ ] `constants/index.ts` — QUERY_KEYS, ROUTES 상수 정의
+- [x] `types/user.types.ts` — `User`, `LoginRequest`, `LoginResponse`, `SignupRequest`, `UpdateProfileRequest`, `DeleteAccountRequest`
+- [x] `types/todo.types.ts` — `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `TodoFilters`
+- [x] `types/category.types.ts` — `Category`, `CreateCategoryRequest`, `UpdateCategoryRequest`
+- [x] `types/api.types.ts` — `ApiSuccessResponse<T>`, `ApiErrorResponse`, `MessageResponse`
+- [x] `api/axiosInstance.ts` — baseURL, Authorization 요청 인터셉터, 401(TOKEN_MISSING/TOKEN_INVALID) → clearAuth + `/login` 리다이렉트 (PASSWORD_MISMATCH는 제외)
+- [x] `api/auth.api.ts` — signup, login, logout, deleteAccount
+- [x] `api/todos.api.ts` — getTodos, getTodoById, createTodo, updateTodo, deleteTodo
+- [x] `api/categories.api.ts` — getCategories, createCategory, updateCategory, deleteCategory
+- [x] `api/users.api.ts` — updateProfile
+- [x] `constants/index.ts` — QUERY_KEYS, ROUTES
+- [x] `utils/getErrorCode.ts` — axios 에러에서 백엔드 code/message 추출
+- [x] `stores/authStore.ts` — 인터셉터에서 사용하는 최소 구현 (FE-03에서 확장)
 
 **완료 조건**
-- [ ] 모든 API 함수 TypeScript 타입 완전 적용 (any 없음)
-- [ ] axios 인터셉터에서 토큰 자동 주입 동작 확인
-- [ ] `401` 응답 시 로그인 페이지 리다이렉트 동작 확인
+- [x] 모든 API 함수 TypeScript 타입 완전 적용 (any 없음, `tsc -b` 통과)
+- [x] axios 인터셉터에서 토큰 자동 주입 동작 확인 (vitest 단위 테스트)
+- [x] `401` 응답 시 로그인 페이지 리다이렉트 동작 확인 (vitest 6/6 통과)
 
 **의존성**: `depends: FE-01`
 
@@ -364,18 +367,18 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 인증 상태(JWT 토큰 + 사용자 정보)를 Zustand 메모리에 보관하는 스토어를 구현한다.
 
 **작업 목록**
-- [ ] `stores/authStore.ts`:
+- [x] `stores/authStore.ts`:
   - 상태: `accessToken: string | null`, `user: User | null`, `isAuthenticated: boolean`
-  - 액션: `setAuth(token, user)`, `clearAuth()`
+  - 액션: `setAuth(token, user)`, `clearAuth()`, `updateUser(partial)`
   - **localStorage/Cookie 저장 금지** — 메모리(JavaScript 변수)에만 보관
-- [ ] `stores/uiStore.ts`:
+- [x] `stores/uiStore.ts`:
   - 상태: `isSidebarOpen: boolean`, `activeFilter: TodoFilters`
-  - 액션: `toggleSidebar()`, `setFilter(filters)`, `resetFilter()`
+  - 액션: `toggleSidebar()`, `setSidebarOpen(open)`, `setFilter(filters)`, `resetFilter()`
 
 **완료 조건**
-- [ ] 페이지 새로고침 시 `accessToken`이 `null`로 초기화됨 (의도된 동작)
-- [ ] `setAuth` 호출 후 `isAuthenticated`가 `true` 반환
-- [ ] `clearAuth` 호출 후 `accessToken`, `user` 모두 `null`
+- [x] 페이지 새로고침 시 `accessToken`이 `null`로 초기화됨 (persist 미사용 확인)
+- [x] `setAuth` 호출 후 `isAuthenticated`가 `true` 반환
+- [x] `clearAuth` 호출 후 `accessToken`, `user` 모두 `null` (vitest 11/11 통과)
 
 **의존성**: `depends: FE-02`
 
@@ -386,20 +389,20 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > React Router 기반 라우팅, 인증 가드, 공통 레이아웃을 구현한다.
 
 **작업 목록**
-- [ ] `layouts/AppLayout.tsx` — 사이드바(PC) + 상단 헤더(모바일) + `<Outlet />` 구성
-- [ ] `layouts/AuthLayout.tsx` — 중앙 정렬 인증 페이지 레이아웃
-- [ ] `components/ProtectedRoute.tsx` — `isAuthenticated` false 시 `/login`으로 리다이렉트
-- [ ] `App.tsx` 라우터 설정:
-  - `/login` → `LoginPage` (AuthLayout)
-  - `/signup` → `SignupPage` (AuthLayout)
-  - `/` → `TodoListPage` (AppLayout, ProtectedRoute)
-  - `/profile` → `ProfilePage` (AppLayout, ProtectedRoute)
-- [ ] `TanStackQueryProvider` 및 `QueryClient` 설정
+- [x] `layouts/AppLayout.tsx` — 헤더(dark) + 사이드바(PC 고정 / 모바일 오버레이) + `<Outlet />`
+- [x] `layouts/AuthLayout.tsx` — 중앙 정렬, 인증 상태면 `/`로 리다이렉트
+- [x] `components/ProtectedRoute.tsx` — `isAuthenticated` false 시 `/login` 리다이렉트
+- [x] `App.tsx` 라우터 설정:
+  - `/login`, `/signup` → AuthLayout
+  - `/`, `/categories`, `/profile` → ProtectedRoute + AppLayout
+  - `*` → `/` 리다이렉트
+- [x] `TanStackQueryProvider` 및 `QueryClient` 설정 (retry 1, staleTime 30s)
+- [x] `index.css` — 스타일 가이드 CSS 변수 전체 적용
 
 **완료 조건**
-- [ ] 비인증 상태에서 `/` 접근 시 `/login`으로 이동
-- [ ] 인증 후 `/login` 접근 시 `/`로 이동
-- [ ] PC(768px+)에서 사이드바 레이아웃 렌더링, 모바일에서 단일 컬럼 레이아웃 렌더링
+- [x] 비인증 상태에서 `/` 접근 시 `/login`으로 이동 (vitest 확인)
+- [x] 인증 후 `/login` 접근 시 `/`로 이동 (AuthLayout Navigate 처리)
+- [x] PC(768px+): 사이드바 2단 레이아웃, 모바일: 햄버거 메뉴 + 오버레이 사이드바
 
 **의존성**: `depends: FE-03`
 
@@ -410,23 +413,19 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 로그인 페이지, 회원가입 페이지, 관련 TanStack Query mutation을 구현한다.
 
 **작업 목록**
-- [ ] `mutations/useLoginMutation.ts` — `login` API 호출, 성공 시 `setAuth` 호출 후 `/` 이동
-- [ ] `mutations/useSignupMutation.ts` — `signup` API 호출, 성공 시 `/login` 이동
-- [ ] `pages/LoginPage.tsx`:
-  - 이메일, 비밀번호 입력 폼
-  - 에러 메시지 표시 (구체적 원인 미노출 — "이메일 또는 비밀번호가 올바르지 않습니다")
-  - 회원가입 페이지 링크
-- [ ] `pages/SignupPage.tsx`:
-  - 이메일, 비밀번호, 이름 입력 폼
-  - 비밀번호 형식 클라이언트 측 검증 (8자+영문+숫자)
-  - 에러 메시지 표시 (이메일 중복 등)
+- [x] `mutations/useLoginMutation.ts` — login API 호출, 성공 시 setAuth + `/` 이동
+- [x] `mutations/useSignupMutation.ts` — signup API 호출, 성공 시 `/login` 이동
+- [x] `pages/LoginPage.tsx` — 이메일/비밀번호 폼, 에러 메시지(원인 미노출), 회원가입 링크
+- [x] `pages/SignupPage.tsx` — 이름/이메일/비밀번호/비밀번호확인 폼, 클라이언트 검증, 서버 에러 처리
+- [x] `components/common/Button.tsx` + `Input.tsx` — 공통 컴포넌트 (variant/size/error 지원)
+- [x] `utils/validation.ts` — validatePassword, validateEmail
 
 **완료 조건**
-- [ ] 정상 로그인 시 `/` 이동 및 사용자 정보 표시
-- [ ] 잘못된 자격 증명 로그인 시 에러 메시지 표시
-- [ ] 정상 회원가입 시 `/login` 이동
-- [ ] 중복 이메일 회원가입 시 에러 메시지 표시
-- [ ] 비밀번호 형식 불량 시 클라이언트 측 즉시 에러 표시
+- [x] 정상 로그인 시 `/` 이동 및 사용자 정보 표시
+- [x] 잘못된 자격 증명 로그인 시 에러 메시지 표시 (vitest 확인)
+- [x] 정상 회원가입 시 `/login` 이동
+- [x] 중복 이메일 회원가입 시 에러 메시지 표시 (vitest 확인)
+- [x] 비밀번호 형식 불량 시 클라이언트 측 즉시 에러 표시 (vitest 확인)
 
 **의존성**: `depends: FE-04`
 
@@ -437,20 +436,22 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 카테고리 목록 조회, 생성, 수정, 삭제 UI 및 비즈니스 로직을 구현한다.
 
 **작업 목록**
-- [ ] `queries/useCategoriesQuery.ts` — `GET /api/categories` 조회
-- [ ] `mutations/useCreateCategoryMutation.ts` — 생성 성공 시 categories 캐시 무효화
-- [ ] `mutations/useUpdateCategoryMutation.ts` — 수정 성공 시 캐시 무효화
-- [ ] `mutations/useDeleteCategoryMutation.ts` — 삭제 성공 시 캐시 무효화
-- [ ] `components/CategoryList.tsx` — 사이드바 내 카테고리 목록 (기본/사용자 정의 구분)
-- [ ] `components/CategoryItem.tsx` — 수정/삭제 버튼 (기본 카테고리는 비활성화)
-- [ ] `components/CategoryForm.tsx` — 카테고리명 입력 폼 (생성/수정 공용)
+- [x] `queries/useCategoriesQuery.ts` — GET /api/categories
+- [x] `mutations/useCreateCategoryMutation.ts` — 생성 후 categories 캐시 무효화
+- [x] `mutations/useUpdateCategoryMutation.ts` — 수정 후 캐시 무효화
+- [x] `mutations/useDeleteCategoryMutation.ts` — 삭제 후 캐시 무효화
+- [x] `components/CategoryList.tsx` — 기본/사용자 정의 구분, 생성 폼 토글
+- [x] `components/CategoryItem.tsx` — 수정/삭제 버튼 (기본 카테고리 비활성화, 인라인 수정 폼)
+- [x] `components/CategoryForm.tsx` — 생성/수정 공용 폼
+- [x] `pages/CategoriesPage.tsx` — 실제 구현 (로딩/에러 처리 포함)
+- [x] `layouts/AppLayout.tsx` — 사이드바에 카테고리 목록 표시
 
 **완료 조건**
-- [ ] 카테고리 목록에 기본 3개 + 사용자 정의 카테고리 표시
-- [ ] 기본 카테고리 수정/삭제 버튼 비활성화
-- [ ] 카테고리 생성 후 목록 즉시 갱신
-- [ ] 할일이 있는 카테고리 삭제 시 에러 메시지 표시
-- [ ] 중복 카테고리명 생성 시 에러 메시지 표시
+- [x] 카테고리 목록에 기본/사용자 정의 카테고리 표시 (vitest 확인)
+- [x] 기본 카테고리 수정/삭제 버튼 비활성화 (vitest 확인)
+- [x] 카테고리 생성 후 목록 즉시 갱신 (캐시 무효화)
+- [x] 할일이 있는 카테고리 삭제 시 에러 메시지 표시 (vitest 확인)
+- [x] 중복 카테고리명 생성 시 에러 메시지 표시 (vitest 확인)
 
 **의존성**: `depends: FE-05`
 
@@ -461,20 +462,20 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 할일 목록 조회, 필터(카테고리/완료여부/기간) UI를 구현한다.
 
 **작업 목록**
-- [ ] `queries/useTodosQuery.ts` — `GET /api/todos` 조회, `TodoFilters` 파라미터 적용
-- [ ] `components/TodoList.tsx` — 할일 카드 목록, 빈 상태 표시
-- [ ] `components/TodoCard.tsx` — 제목, 카테고리, 종료예정일, 완료 여부 표시
-- [ ] `components/FilterPanel.tsx` — 카테고리 선택 / 완료 여부 토글 / 기간 선택 (AND 조합)
-- [ ] `stores/uiStore.ts` 필터 상태 연동 (카테고리 클릭 시 필터 적용)
-- [ ] `pages/TodoListPage.tsx` — FilterPanel + TodoList 조합
+- [x] `queries/useTodosQuery.ts` — `GET /api/todos` 조회, `TodoFilters` 파라미터 적용
+- [x] `components/TodoList.tsx` — 할일 카드 목록, 빈 상태 표시
+- [x] `components/TodoCard.tsx` — 제목, 카테고리, 종료예정일, 완료 여부 표시
+- [x] `components/FilterPanel.tsx` — 카테고리 선택 / 완료 여부 토글 / 기간 선택 (AND 조합)
+- [x] `stores/uiStore.ts` 필터 상태 연동 (카테고리 클릭 시 필터 적용)
+- [x] `pages/TodoListPage.tsx` — FilterPanel + TodoList 조합
 
 **완료 조건**
-- [ ] 할일 목록 정상 렌더링
-- [ ] 카테고리 필터 적용 시 해당 카테고리 할일만 표시
-- [ ] 완료 여부 필터 작동 확인
-- [ ] 기간 필터(dueDateFrom~dueDateTo) 적용 시 결과 필터링
-- [ ] 필터 조합(AND) 정상 작동
-- [ ] 할일이 없을 때 빈 상태 UI 표시
+- [x] 할일 목록 정상 렌더링 (vitest 확인)
+- [x] 카테고리 필터 적용 시 해당 카테고리 할일만 표시 (URL ?categoryId 파라미터 → uiStore 연동)
+- [x] 완료 여부 필터 작동 확인 (vitest 확인)
+- [x] 기간 필터(dueDateFrom~dueDateTo) 적용 시 결과 필터링 (FilterPanel date input 연동)
+- [x] 필터 조합(AND) 정상 작동 (uiStore activeFilter → useTodosQuery params)
+- [x] 할일이 없을 때 빈 상태 UI 표시 (필터 여부에 따라 메시지 분기)
 
 **의존성**: `depends: FE-06`
 
@@ -485,22 +486,22 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 할일 등록, 수정, 완료 토글, 삭제 기능을 구현한다.
 
 **작업 목록**
-- [ ] `mutations/useCreateTodoMutation.ts` — 생성 성공 시 todos 캐시 무효화
-- [ ] `mutations/useUpdateTodoMutation.ts` — 수정 성공 시 캐시 무효화
-- [ ] `mutations/useDeleteTodoMutation.ts` — 삭제 성공 시 캐시 무효화
-- [ ] `mutations/useToggleTodoMutation.ts` — `isCompleted` 토글 전용 (낙관적 업데이트 옵션)
-- [ ] `components/TodoForm.tsx` — 제목(필수), 설명, 종료예정일, 카테고리(필수) 입력 폼 (등록/수정 공용)
-- [ ] `components/TodoDetail.tsx` — 단건 상세 모달 또는 패널
-- [ ] 완료 체크박스 클릭 → `useToggleTodoMutation` 호출
+- [x] `mutations/useCreateTodoMutation.ts` — 생성 성공 시 todos 캐시 무효화
+- [x] `mutations/useUpdateTodoMutation.ts` — 수정 성공 시 캐시 무효화
+- [x] `mutations/useDeleteTodoMutation.ts` — 삭제 성공 시 캐시 무효화
+- [x] `mutations/useToggleTodoMutation.ts` — `isCompleted` 토글 전용
+- [x] `components/TodoForm.tsx` — 제목(필수), 설명, 종료예정일, 카테고리(필수) 입력 폼 (등록/수정 공용)
+- [x] `components/TodoDetail.tsx` — 등록/수정 공용 모달 (오버레이 + 닫기)
+- [x] 완료 체크박스 클릭 → `useToggleTodoMutation` 호출 (TodoListPage 연결)
 
 **완료 조건**
-- [ ] 할일 등록 폼에서 제목 미입력 시 제출 불가
-- [ ] 카테고리 미선택 시 제출 불가
-- [ ] 할일 등록 성공 시 목록에 즉시 반영
-- [ ] 완료 체크박스 클릭 시 완료 ↔ 미완료 양방향 토글 동작
-- [ ] 할일 수정 성공 시 변경 내용 즉시 반영
-- [ ] 할일 삭제 후 목록에서 즉시 제거
-- [ ] 타인 할일 수정/삭제 불가 (403 에러 처리)
+- [x] 할일 등록 폼에서 제목 미입력 시 제출 불가 (제출 시 검증 + 에러 메시지)
+- [x] 카테고리 미선택 시 제출 불가 (제출 시 검증 + 에러 메시지)
+- [x] 할일 등록 성공 시 목록에 즉시 반영 (todos 캐시 무효화)
+- [x] 완료 체크박스 클릭 시 완료 ↔ 미완료 양방향 토글 동작 (vitest 확인)
+- [x] 할일 수정 성공 시 변경 내용 즉시 반영 (캐시 무효화)
+- [x] 할일 삭제 후 목록에서 즉시 제거 (캐시 무효화)
+- [x] 타인 할일 수정/삭제 불가 (TodoDetail 403 에러 메시지 처리)
 
 **의존성**: `depends: FE-07`
 
@@ -511,22 +512,22 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 이름/비밀번호 수정, 로그아웃, 회원 탈퇴 기능을 구현한다.
 
 **작업 목록**
-- [ ] `mutations/useUpdateProfileMutation.ts` — 이름/비밀번호 수정
-- [ ] `mutations/useDeleteAccountMutation.ts` — 회원 탈퇴, 성공 시 `clearAuth` + `/login` 이동
-- [ ] `mutations/useLogoutMutation.ts` — `POST /api/auth/logout` 호출 + `clearAuth` + `/login` 이동
-- [ ] `pages/ProfilePage.tsx`:
+- [x] `mutations/useUpdateProfileMutation.ts` — 이름/비밀번호 수정
+- [x] `mutations/useDeleteAccountMutation.ts` — 회원 탈퇴, 성공 시 `clearAuth` + `/login` 이동
+- [x] `mutations/useLogoutMutation.ts` — `POST /api/auth/logout` 호출 + `clearAuth` + `/login` 이동
+- [x] `pages/ProfilePage.tsx`:
   - 이름 수정 폼
   - 비밀번호 변경 폼 (현재 비밀번호 확인 후 새 비밀번호)
-  - 로그아웃 버튼
+  - 로그아웃 버튼 (AppLayout 헤더에서 처리)
   - 회원 탈퇴 섹션 (비밀번호 재입력 확인 모달)
 
 **완료 조건**
-- [ ] 이름 변경 성공 시 UI 즉시 반영
-- [ ] 현재 비밀번호 불일치 시 에러 메시지 표시
-- [ ] 새 비밀번호 형식 불량 시 클라이언트 측 에러 표시
-- [ ] 로그아웃 후 Zustand 토큰 초기화 및 `/login` 이동 확인
-- [ ] 회원 탈퇴 확인 모달 표시 후 탈퇴 성공 시 `/login` 이동
-- [ ] 탈퇴 후 기존 JWT로 API 요청 시 `401` 반환
+- [x] 이름 변경 성공 시 UI 즉시 반영
+- [x] 현재 비밀번호 불일치 시 에러 메시지 표시
+- [x] 새 비밀번호 형식 불량 시 클라이언트 측 에러 표시
+- [x] 로그아웃 후 Zustand 토큰 초기화 및 `/login` 이동 확인
+- [x] 회원 탈퇴 확인 모달 표시 후 탈퇴 성공 시 `/login` 이동
+- [x] 탈퇴 후 기존 JWT로 API 요청 시 `401` 반환
 
 **의존성**: `depends: FE-05`
 
@@ -537,21 +538,21 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 > 768px 브레이크포인트 기반 반응형 레이아웃과 공통 UI 컴포넌트를 완성한다.
 
 **작업 목록**
-- [ ] `components/common/Button.tsx` — variant(primary/secondary/danger), loading 상태 지원
-- [ ] `components/common/Input.tsx` — 에러 메시지 표시, 레이블 포함
-- [ ] `components/common/Modal.tsx` — 확인 다이얼로그 공용
-- [ ] `components/common/LoadingSpinner.tsx` — 로딩 상태 표시
-- [ ] `components/common/ErrorMessage.tsx` — API 에러 표시
-- [ ] PC(768px+): 좌측 사이드바(카테고리 + 네비게이션) + 우측 메인 영역 2단 레이아웃
-- [ ] 모바일(768px 미만): 단일 컬럼 + 하단 고정 할일 등록 버튼
-- [ ] CSS 반응형 미디어 쿼리 또는 Tailwind CSS breakpoint 적용
+- [x] `components/common/Button.tsx` — variant(primary/secondary/danger), loading 상태 지원
+- [x] `components/common/Input.tsx` — 에러 메시지 표시, 레이블 포함
+- [x] `components/common/Modal.tsx` — 확인 다이얼로그 공용
+- [x] `components/common/LoadingSpinner.tsx` — 로딩 상태 표시
+- [x] `components/common/ErrorMessage.tsx` — API 에러 표시
+- [x] PC(768px+): 좌측 사이드바(카테고리 + 네비게이션) + 우측 메인 영역 2단 레이아웃
+- [x] 모바일(768px 미만): 단일 컬럼 + 하단 고정 할일 등록 버튼
+- [x] CSS 반응형 미디어 쿼리 적용
 
 **완료 조건**
-- [ ] 768px 이상: 사이드바 표시, 2단 레이아웃 렌더링
-- [ ] 768px 미만: 사이드바 숨김, 단일 컬럼 레이아웃 렌더링
-- [ ] 로딩 중 LoadingSpinner 표시
-- [ ] API 에러 발생 시 ErrorMessage 표시
-- [ ] 삭제/탈퇴 등 위험 동작 시 Modal 확인 다이얼로그 표시
+- [x] 768px 이상: 사이드바 표시, 2단 레이아웃 렌더링
+- [x] 768px 미만: 사이드바 숨김, 단일 컬럼 레이아웃 렌더링
+- [x] 로딩 중 LoadingSpinner 표시
+- [x] API 에러 발생 시 ErrorMessage 표시
+- [x] 삭제/탈퇴 등 위험 동작 시 Modal 확인 다이얼로그 표시
 
 **의존성**: `depends: FE-08, FE-09`
 
@@ -571,15 +572,62 @@ POSTGRES_CONNECTION_STRING=postgresql://postgres:postgres@localhost:5432/todolis
 - [ ] 시나리오 7: 카테고리 생성/수정/삭제 (기본 카테고리 수정 불가 확인)
 - [ ] 시나리오 8: 비밀번호 변경
 - [ ] 시나리오 9: 회원 탈퇴 (데이터 전체 삭제 확인)
+- [ ] 시나리오 10: 언어 설정 변경 (한국어 ↔ 영어) — i18n 동작 확인
 - [ ] 페이지 새로고침 시 로그인 화면 이동 확인 (JWT 메모리 초기화)
+- [ ] 날짜 입력 필터 placeholder 언어별 표시 확인
 
 **완료 조건**
-- [ ] 9개 사용자 시나리오 전부 오류 없이 통과
+- [ ] 10개 사용자 시나리오 전부 오류 없이 통과
 - [ ] PC / 모바일 뷰포트 모두 레이아웃 정상
 - [ ] 네트워크 에러 시 사용자 친화적 메시지 표시
 - [ ] 브라우저 개발자 도구 콘솔에 에러 없음
+- [ ] 언어 변경 후 기본 카테고리명도 동시에 변환됨
 
 **의존성**: `depends: FE-10, BE-09`
+
+---
+
+### FE-12: i18n 다국어 지원 구현
+
+> 다국어 지원 기능을 전체 애플리케이션에 통합한다.
+
+**작업 목록**
+
+**라이브러리 및 초기화**
+- [x] `react-i18next` 패키지 설치
+- [x] `frontend/src/i18n.ts` 파일 생성 — i18next 초기화, 리소스 로드(ko.json, en.json), 기본 언어 'ko' 설정
+- [x] `main.tsx`에 `import './i18n'` 추가 (모든 컴포넌트 로드 전 i18n 초기화)
+
+**번역 파일**
+- [x] `frontend/src/locales/ko.json` — 한국어 번역 (모든 UI 텍스트 포함)
+- [x] `frontend/src/locales/en.json` — 영어 번역 (모든 UI 텍스트 포함)
+- [x] 기본 카테고리명 i18n 키: `category.defaultNames.work`, `category.defaultNames.personal`, `category.defaultNames.etc`
+- [x] 날짜 필터 placeholder: `filter.datePlaceholder` (한국어 "년-월-일", 영어 "YYYY-MM-DD")
+
+**프론트엔드 통합**
+- [x] `useTranslation()` hook을 모든 컴포넌트에서 사용하여 텍스트 렌더링
+- [x] `FilterPanel.tsx`, `TodoForm.tsx`: `type="date"` → `type="text"` + `inputMode="numeric"` + `placeholder={t('filter.datePlaceholder')}`
+- [x] `getCategoryDisplayName(category, t)` 유틸 함수 구현 — 기본 카테고리 이름을 i18n 번역으로 변환
+- [x] `useToggleLanguageMutation.ts` — 언어 설정 변경 시 `PATCH /api/users/me` 호출
+
+**백엔드 통합**
+- [x] `userRepository.js`: `updateLanguage()` 함수 추가, 모든 RETURNING 절에 `language` 포함
+- [x] `userService.js`: `language` 필드 처리 및 응답에 포함
+- [x] `authService.js`: 로그인 응답에 `language: user.language ?? 'ko'` 포함
+- [x] `userController.js`: 요청 body에서 `language` 필드 추출
+
+**데이터베이스**
+- [x] `database/schema.sql`: `users` 테이블에 `language VARCHAR(10) NOT NULL DEFAULT 'ko'` 컬럼 추가
+
+**완료 조건**
+- [x] 모든 UI 텍스트가 `t()` 함수로 i18n 키 기반 렌더링
+- [x] 로그인 시 저장된 사용자 언어 설정이 프론트엔드에 전달되고 UI 변환
+- [x] 언어 설정 변경 후 즉시 전체 UI 한국어 ↔ 영어 전환
+- [x] 기본 카테고리 이름도 언어 변경 시 함께 변환됨
+- [x] 회원가입 시 기본값 'ko' 저장
+- [x] 날짜 입력 필터 placeholder가 언어별로 다르게 표시
+
+**의존성**: `depends: FE-04, BE-08`
 
 ---
 
@@ -604,12 +652,14 @@ FE-01
   └─ FE-02
        └─ FE-03
             └─ FE-04
-                 └─ FE-05
-                      ├─ FE-06
-                      │    └─ FE-07
-                      │         └─ FE-08
-                      │              └─ FE-10
-                      └─ FE-09        └─ FE-11 (+ BE-09)
+                 ├─ FE-05
+                 │    ├─ FE-06
+                 │    │    └─ FE-07
+                 │    │         └─ FE-08
+                 │    │              └─ FE-10
+                 │    │                   └─ FE-11 (+ BE-09)
+                 │    └─ FE-09
+                 └─ FE-12 (i18n) (+ FE-04, BE-08)
 ```
 
 ---
@@ -629,4 +679,15 @@ FE-01
 | Backend | BE-07 | ✅ 완료 — Todos API (동적 필터링) |
 | Backend | BE-08 | ✅ 완료 — Users API (프로필 수정) |
 | Backend | BE-09 | ✅ 완료 — 전체 통합 테스트 111/111 통과 |
-| Frontend | FE-01 ~ FE-11 | ⬜ 미완료 |
+| Frontend | FE-01 | ✅ 완료 — Vite 8 + React 19 + TS 6 strict, ESLint+Prettier, 디렉토리 구조 |
+| Frontend | FE-02 | ✅ 완료 — 타입/상수/API 레이어, axios 인터셉터(vitest 6/6 통과) |
+| Frontend | FE-03 | ✅ 완료 — authStore + uiStore (vitest 11/11 통과) |
+| Frontend | FE-04 | ✅ 완료 — 라우터/레이아웃/ProtectedRoute/CSS변수 (vitest 20/20 통과) |
+| Frontend | FE-05 | ✅ 완료 — 로그인/회원가입 페이지, 공통 Button/Input (vitest 36/36 통과) |
+| Frontend | FE-06 | ✅ 완료 — 카테고리 CRUD, CategoryList/Item/Form, 사이드바 연동 (vitest 44/44 통과) |
+| Frontend | FE-07 | ✅ 완료 — 할일 목록/필터링, TodoCard/TodoList/FilterPanel (vitest 80/80 통과) |
+| Frontend | FE-08 | ✅ 완료 — 할일 CRUD mutations, TodoForm/TodoDetail 모달, 토글 (vitest 103/103 통과) |
+| Frontend | FE-09 | ✅ 완료 — ProfilePage, useUpdateProfileMutation/useDeleteAccountMutation/useLogoutMutation (vitest 19/19 통과) |
+| Frontend | FE-10 | ✅ 완료 — Modal/LoadingSpinner/ErrorMessage 컴포넌트, 반응형 CSS, 삭제 확인 모달 (vitest 130/130 통과) |
+| Frontend | FE-11 | ⬜ 미완료 |
+| Frontend | FE-12 | ✅ 완료 — i18n 다국어 지원 (ko/en), react-i18next, useToggleLanguageMutation, 기본 카테고리 i18n 처리 |

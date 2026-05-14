@@ -16,8 +16,8 @@ async function getCategories(req, res, next) {
 async function createCategory(req, res, next) {
   try {
     const { userId } = req.user;
-    const { name } = req.body;
-    const category = await categoryService.createCategory(userId, name);
+    const { name, icon } = req.body;
+    const category = await categoryService.createCategory(userId, name, icon);
     return res.status(201).json(successResponse(category));
   } catch (err) {
     return next(err);
@@ -28,8 +28,8 @@ async function updateCategory(req, res, next) {
   try {
     const { userId } = req.user;
     const categoryId = req.params.id;
-    const { name } = req.body;
-    const category = await categoryService.updateCategory(userId, categoryId, name);
+    const { name, icon } = req.body;
+    const category = await categoryService.updateCategory(userId, categoryId, name, icon);
     return res.status(200).json(successResponse(category));
   } catch (err) {
     return next(err);

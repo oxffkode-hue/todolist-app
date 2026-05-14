@@ -14,14 +14,16 @@ function isValidPassword(pw) {
 }
 
 async function signup(email, password, name) {
-  // BR-01: 이메일 중복 확인
+  console.log(`[Auth] signup attempt: ${email}`);
+
   const existing = await findByEmail(email);
   if (existing) {
+    console.warn(`[Auth] signup failed — email already in use: ${email}`);
     throw new ConflictError('이미 사용 중인 이메일입니다', 'EMAIL_CONFLICT');
   }
 
-  // BR-02: 비밀번호 형식 검증
   if (!isValidPassword(password)) {
+    console.warn(`[Auth] signup failed — invalid password format: ${email}`);
     throw new BadRequestError(
       '비밀번호는 8자 이상 영문+숫자 조합이어야 합니다',
       'INVALID_PASSWORD_FORMAT'
@@ -30,23 +32,27 @@ async function signup(email, password, name) {
 
   const hashedPassword = await hashPassword(password);
   const user = await createUser(email, hashedPassword, name);
+  console.log(`[Auth] signup success: userId=${user.id} email=${email}`);
   return user;
 }
 
 async function login(email, password) {
-  // BR-03: 이메일 존재 여부 (구체적 원인 노출 금지)
+  console.log(`[Auth] login attempt: ${email}`);
+
   const user = await findByEmail(email);
   if (!user) {
+    console.warn(`[Auth] login failed — user not found: ${email}`);
     throw new UnauthorizedError('이메일 또는 비밀번호가 올바르지 않습니다');
   }
 
-  // BR-03: 비밀번호 불일치
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) {
+    console.warn(`[Auth] login failed — password mismatch: ${email}`);
     throw new UnauthorizedError('이메일 또는 비밀번호가 올바르지 않습니다');
   }
 
   const accessToken = signToken({ userId: user.id, email: user.email });
+  console.log(`[Auth] login success: userId=${user.id} email=${email}`);
 
   return {
     accessToken,
@@ -54,6 +60,8 @@ async function login(email, password) {
       id: user.id,
       email: user.email,
       name: user.name,
+      darkMode: user.darkMode ?? false,
+      language: user.language ?? 'ko',
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     },
@@ -65,17 +73,22 @@ async function logout() {
 }
 
 async function deleteAccount(userId, password) {
+  console.log(`[Auth] deleteAccount attempt: userId=${userId}`);
+
   const user = await findById(userId);
   if (!user) {
+    console.warn(`[Auth] deleteAccount failed — user not found: userId=${userId}`);
     throw new UnauthorizedError('사용자를 찾을 수 없습니다');
   }
 
   const isMatch = await comparePassword(password, user.password);
   if (!isMatch) {
+    console.warn(`[Auth] deleteAccount failed — password mismatch: userId=${userId}`);
     throw new UnauthorizedError('이메일 또는 비밀번호가 올바르지 않습니다');
   }
 
   await deleteUser(userId);
+  console.log(`[Auth] deleteAccount success: userId=${userId}`);
 }
 
 module.exports = { signup, login, logout, deleteAccount };

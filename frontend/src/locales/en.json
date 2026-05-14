@@ -1,0 +1,140 @@
+{
+  "app": {
+    "name": "TODOLIST",
+    "tagline": "Task Management Service"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "retry": "Please try again later."
+  },
+  "error": {
+    "passwordMinLength": "Password must be at least 8 characters.",
+    "passwordNeedsLetter": "Password must contain a letter.",
+    "passwordNeedsNumber": "Password must contain a number."
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "emailPlaceholder": "example@email.com",
+    "passwordPlaceholder": "••••••••",
+    "namePlaceholder": "John Doe",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginError": "Invalid email or password.",
+    "passwordConfirm": "Confirm Password",
+    "passwordHint": "8+ characters, letters and numbers",
+    "nameRequired": "Please enter your name.",
+    "emailRequired": "Please enter your email.",
+    "emailInvalid": "Please enter a valid email address.",
+    "emailDuplicate": "This email is already in use.",
+    "passwordFormatError": "Password must be 8+ characters with letters and numbers.",
+    "passwordMismatch": "Passwords do not match."
+  },
+  "nav": {
+    "todos": "Todo List",
+    "categories": "Categories",
+    "settings": "Settings",
+    "menu": "Menu"
+  },
+  "darkMode": {
+    "switchToLight": "Switch to Light Mode",
+    "switchToDark": "Switch to Dark Mode",
+    "light": "Light Mode",
+    "dark": "Dark Mode"
+  },
+  "language": {
+    "switchTo": "한국어",
+    "current": "English"
+  },
+  "todo": {
+    "listTitle": "Todo List",
+    "addNew": "+ Add New Todo",
+    "summary": "Total {{total}} · Pending {{pending}} · Done {{completed}}",
+    "loadError": "Failed to load todos.",
+    "deleteTitle": "Delete Todo",
+    "deleteConfirm": "Are you sure you want to delete this todo?",
+    "empty": "No todos yet.",
+    "emptyFiltered": "No todos match your filters.",
+    "emptyHint": "Try changing filters or adding a new todo.",
+    "unknownCategory": "Unknown",
+    "noDueDate": "No due date",
+    "markComplete": "Mark as complete",
+    "markIncomplete": "Mark as incomplete",
+    "editTitle": "Edit Todo",
+    "createTitle": "Add New Todo",
+    "close": "Close",
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Enter todo title",
+    "titleRequired": "Please enter a title.",
+    "descLabel": "Description",
+    "descPlaceholder": "Enter details (optional)",
+    "categoryLabel": "Category *",
+    "categoryPlaceholder": "Select a category",
+    "categoryRequired": "Please select a category.",
+    "dueDateLabel": "Due Date",
+    "forbiddenError": "You do not have permission to edit this todo.",
+    "saveAction": "Save",
+    "editAction": "Edit"
+  },
+  "filter": {
+    "title": "Filters",
+    "reset": "Reset",
+    "category": "Category",
+    "allCategory": "All",
+    "completion": "Status",
+    "all": "All",
+    "incomplete": "Incomplete",
+    "complete": "Complete",
+    "dueDate": "Due Date"
+  },
+  "category": {
+    "pageTitle": "Categories",
+    "defaultSection": "Default Categories",
+    "mySection": "My Categories",
+    "defaultNames": {
+      "업무": "Work",
+      "개인": "Personal",
+      "기타": "Other"
+    },
+    "defaultHint": "Default categories cannot be edited or deleted.",
+    "addNew": "+ Add Category",
+    "noCustom": "No custom categories yet.",
+    "nameLabel": "Category Name",
+    "namePlaceholder": "Enter category name",
+    "iconLabel": "Icon",
+    "duplicateError": "This category name is already in use.",
+    "hasTodosError": "Cannot delete a category that has todos.",
+    "deleteError": "An error occurred while deleting."
+  },
+  "profile": {
+    "title": "Profile Settings",
+    "nameSection": "Change Name",
+    "nameLabel": "Name",
+    "changeNameBtn": "Change Name",
+    "nameSuccess": "Name updated successfully.",
+    "nameError": "Failed to update name.",
+    "passwordSection": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "newPasswordConfirm": "Confirm New Password",
+    "changePasswordBtn": "Change Password",
+    "passwordSuccess": "Password changed successfully.",
+    "passwordMismatch": "Passwords do not match.",
+    "wrongCurrentPassword": "Current password is incorrect.",
+    "passwordChangeError": "Failed to change password.",
+    "dangerSection": "Delete Account (Danger Zone)",
+    "dangerDesc": "Deleting your account will permanently remove all your data.",
+    "deleteAccountBtn": "Delete Account",
+    "deleteModalTitle": "Delete Account",
+    "deleteModalDesc": "All data will be permanently deleted.",
+    "deletePasswordLabel": "Password",
+    "confirmDeleteBtn": "Confirm Delete"
+  }
+}

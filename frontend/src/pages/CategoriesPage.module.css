@@ -1,0 +1,15 @@
+.page {
+  max-width: 640px;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-dark);
+  margin-bottom: var(--space-8);
+}
+
+.status {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

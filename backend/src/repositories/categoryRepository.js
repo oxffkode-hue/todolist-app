@@ -21,21 +21,21 @@ async function findById(categoryId) {
   return toCamel(rows[0]) || null;
 }
 
-async function create(userId, name) {
+async function create(userId, name, icon = 'folder') {
   const { rows } = await pool.query(
-    `INSERT INTO categories (user_id, name, is_default)
-     VALUES ($1, $2, false)
+    `INSERT INTO categories (user_id, name, icon, is_default)
+     VALUES ($1, $2, $3, false)
      RETURNING *`,
-    [userId, name]
+    [userId, name, icon]
   );
   return toCamel(rows[0]);
 }
 
-async function update(categoryId, name) {
+async function update(categoryId, name, icon) {
   const { rows } = await pool.query(
-    `UPDATE categories SET name = $1, updated_at = NOW()
-     WHERE id = $2 RETURNING *`,
-    [name, categoryId]
+    `UPDATE categories SET name = $1, icon = $2, updated_at = NOW()
+     WHERE id = $3 RETURNING *`,
+    [name, icon, categoryId]
   );
   return toCamel(rows[0]);
 }
