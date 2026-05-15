@@ -42,6 +42,7 @@ const mockCategories: Category[] = [
     id: 'cat-1',
     userId: null,
     name: '업무',
+    icon: 'tag',
     isDefault: true,
     createdAt: '2026-05-14T00:00:00.000Z',
     updatedAt: '2026-05-14T00:00:00.000Z',
